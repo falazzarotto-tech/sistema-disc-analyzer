@@ -43,16 +43,14 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
 
     doc.pipe(reply.raw);
 
-    // Cabeçalho
     doc.fontSize(25).text('Relatório de Perfil DISC', { align: 'center' });
     doc.moveDown();
     doc.fontSize(14).text(`Candidato: ${user.name}`);
     doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`);
     doc.moveDown();
-    doc.path('M 50 150 L 550 150').stroke();
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
     doc.moveDown();
 
-    // Resultado Principal
     doc.fontSize(18).fillColor('#2c3e50').text(`Perfil Dominante: ${info.name}`);
     doc.moveDown(0.5);
     doc.fontSize(12).fillColor('black').text(`Características:`, { underline: true });
@@ -67,7 +65,6 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
     doc.text(info.growth);
     doc.moveDown(2);
 
-    // Tabela de Pontos
     doc.fontSize(14).text('Pontuação Detalhada:');
     doc.fontSize(12)
       .text(`- Dominância (D): ${scores.D}`)
