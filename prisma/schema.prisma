@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-id-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -21,7 +21,7 @@ model DiscAnswer {
   userId     String
   user       User     @relation(fields: [userId], references: [id])
   questionId Int
-  dimension  String   // Mudamos de Enum para String para total flexibilidade
+  dimension  String
   score      Int
   createdAt  DateTime @default(now())
 }
