@@ -4,23 +4,21 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String       @id @default(uuid())
-  email     String       @unique
-  name      String
-  answers   DiscAnswer[]
-  createdAt DateTime     @default(now())
+  id    String       @id @default(uuid())
+  name  String
+  email String       @unique
+  answers DiscAnswer[]
 }
 
 model DiscAnswer {
   id         String   @id @default(uuid())
   userId     String
+  user       User     @relation(fields: [userId], references: [id])
   questionId Int
   dimension  String
   score      Int
-  user       User     @relation(fields: [userId], references: [id])
   createdAt  DateTime @default(now())
 }
