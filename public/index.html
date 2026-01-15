@@ -18,6 +18,8 @@
         .progress-fill { background-color: #F85E5E; transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1); }
         .context-pill { border: 1px solid #E5E7EB; padding: 12px 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-weight: 500; text-align: center; }
         .context-pill.selected { background-color: #1A1A1A; color: white; border-color: #1A1A1A; }
+        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .loading-pulse { animation: pulse-soft 2s infinite ease-in-out; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
@@ -33,7 +35,6 @@
 
     <main class="max-w-2xl w-full px-6 pb-20">
         
-        <!-- BARRA DE PROGRESSO (SÓ APARECE NO TESTE) -->
         <div id="progressWrapper" class="hidden mb-12">
             <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">
                 <span id="blockName">Mapeamento</span>
@@ -88,7 +89,6 @@
                 <h2 id="transitionTitle" class="text-3xl font-extrabold text-gray-900 mb-4 leading-tight px-6">...</h2>
                 <p id="transitionText" class="text-gray-500 text-sm mb-12">Não pense demais. Escolha a opção que mais se aproxima do seu momento atual.</p>
                 <button onclick="resumeTest()" class="w-full py-5 bg-black text-white font-bold pill-button shadow-xl">Continuar</button>
-                <p class="text-[11px] text-gray-400 mt-4">Leva menos de 1 minuto.</p>
             </div>
 
             <!-- STEP 3: TELA DE PERGUNTAS -->
@@ -97,19 +97,52 @@
                     <span id="qNumber" class="anima-text-coral font-bold text-[10px] uppercase tracking-[0.2em]">Questão 1</span>
                     <h2 id="qText" class="text-2xl font-extrabold text-gray-900 mt-3 leading-tight">...</h2>
                 </header>
-                <div class="space-y-3" id="optionsWrapper">
-                    <!-- Opções injetadas via JS -->
-                </div>
+                <div class="space-y-3" id="optionsWrapper"></div>
             </div>
 
-            <!-- STEP 4: TELA FINAL -->
-            <div id="step3" class="step text-center py-10">
-                <div class="w-20 h-20 anima-coral rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            <!-- STEP 4: TELA DE ENCERRAMENTO (NOVA) -->
+            <div id="step3" class="step py-6">
+                <header class="text-center mb-10">
+                    <div class="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h1 class="text-3xl font-black text-gray-900 mb-2">Análise concluída</h1>
+                    <p class="text-gray-400 text-sm">Obrigado por dedicar este tempo à sua reflexão.</p>
+                </header>
+
+                <section class="bg-gray-50 rounded-[32px] p-8 mb-8 border border-gray-100">
+                    <h2 class="font-bold text-lg mb-3">Não existe resultado certo ou errado.</h2>
+                    <p class="text-gray-600 leading-relaxed">O que você respondeu reflete como você está funcionando neste momento, considerando contexto, desafios e energia atual.</p>
+                </section>
+
+                <section class="mb-10 px-4">
+                    <h3 class="font-bold text-sm uppercase tracking-widest text-gray-400 mb-6">O que você vai receber</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3 text-gray-700 font-medium">
+                            <span class="anima-text-coral font-bold">•</span>
+                            <span>Um Mapa de Dinâmica Psico-Comportamental</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-gray-700 font-medium">
+                            <span class="anima-text-coral font-bold">•</span>
+                            <span>Uma leitura integrada do seu estado atual</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-gray-700 font-medium">
+                            <span class="anima-text-coral font-bold">•</span>
+                            <span>Orientações práticas, sem rótulos</span>
+                        </li>
+                    </ul>
+                    <p class="text-[11px] text-gray-400 mt-6 italic">O resultado não define quem você é — ele amplia consciência sobre o agora.</p>
+                </section>
+
+                <div class="text-center mb-10">
+                    <p class="text-xs text-gray-400 loading-pulse">Estamos organizando e integrando suas respostas...</p>
                 </div>
-                <h1 class="text-3xl font-black text-gray-900 mb-4">Mapeamento Concluído</h1>
-                <p class="text-gray-500 text-lg mb-12 leading-relaxed">Sua análise de dinâmica psico-comportamental foi processada com sucesso.</p>
-                <button id="btnDownload" class="w-full py-5 anima-coral text-white font-bold pill-button shadow-2xl">Baixar Mapa de Dinâmica (PDF)</button>
+
+                <footer class="text-center">
+                    <p class="text-gray-900 font-bold mb-6">Mudança começa por consciência.<br><span class="anima-text-coral">Você já deu o primeiro passo.</span></p>
+                    <button id="btnDownload" class="w-full py-5 anima-coral text-white font-bold pill-button shadow-2xl hover:scale-[1.02]">Ver meu resultado</button>
+                    <p class="text-[11px] text-gray-400 mt-4">Você poderá revisitar este mapa sempre que quiser.</p>
+                </footer>
             </div>
 
         </div>
@@ -216,12 +249,8 @@
         if (currentQuestionIndex < questions.length - 1) {
             currentQuestionIndex++;
             const nextCat = questions[currentQuestionIndex].cat;
-            
-            if (nextCat !== currentCat) {
-                showTransition(nextCat);
-            } else {
-                renderQuestion();
-            }
+            if (nextCat !== currentCat) showTransition(nextCat);
+            else renderQuestion();
         } else {
             submitTest();
         }
