@@ -18,6 +18,7 @@ app.get('/users', async () => await prisma.user.findMany());
 
 app.get('/disc/:userId/pdf', async (request, reply) => {
   const { userId } = request.params as { userId: string };
+  
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     const results = await prisma.discAnswer.groupBy({
@@ -35,56 +36,57 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
     const dominant = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
     const info = DISC_INTERPRETATION[dominant];
 
-    // Criar o documento
-    const doc = new PDFDocument({ margin: 50 });
-    
-    // Configurar os headers
-    reply.raw.writeHead(200, {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename=relatorio-${user.name.replace(/\s+/g, '-')}.pdf`
+    // Criar o PDF em memória (Buffer)
+    const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
+      const doc = new PDFDocument({ margin: 50 });
+      const chunks: Buffer[] = [];
+
+      doc.on('data', (chunk) => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', (err) => reject(err));
+
+      // Conteúdo do PDF
+      doc.fontSize(25).text('Relatório de Perfil DISC', { align: 'center' });
+      doc.moveDown();
+      doc.fontSize(14).text(`Candidato: ${user.name}`);
+      doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`);
+      doc.moveDown();
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+      doc.moveDown();
+
+      doc.fontSize(18).fillColor('#2c3e50').text(`Perfil Dominante: ${info.name}`);
+      doc.moveDown(0.5);
+      doc.fontSize(12).fillColor('black').text(`Características:`, { underline: true });
+      doc.text(info.traits);
+      doc.moveDown();
+
+      doc.fontSize(12).text(`Pontos Fortes:`, { underline: true });
+      doc.text(info.strengths);
+      doc.moveDown();
+
+      doc.fontSize(12).text(`Áreas de Desenvolvimento:`, { underline: true });
+      doc.text(info.growth);
+      doc.moveDown(2);
+
+      doc.fontSize(14).text('Pontuação Detalhada:');
+      doc.fontSize(12)
+        .text(`- Dominância (D): ${scores.D}`)
+        .text(`- Influência (I): ${scores.I}`)
+        .text(`- Estabilidade (S): ${scores.S}`)
+        .text(`- Conformidade (C): ${scores.C}`);
+
+      doc.end();
     });
 
-    // Conectar o PDF à resposta do servidor
-    doc.pipe(reply.raw);
-
-    // Conteúdo do PDF
-    doc.fontSize(25).text('Relatório de Perfil DISC', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(14).text(`Candidato: ${user.name}`);
-    doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`);
-    doc.moveDown();
-    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-    doc.moveDown();
-
-    doc.fontSize(18).fillColor('#2c3e50').text(`Perfil Dominante: ${info.name}`);
-    doc.moveDown(0.5);
-    doc.fontSize(12).fillColor('black').text(`Características:`, { underline: true });
-    doc.text(info.traits);
-    doc.moveDown();
-
-    doc.fontSize(12).text(`Pontos Fortes:`, { underline: true });
-    doc.text(info.strengths);
-    doc.moveDown();
-
-    doc.fontSize(12).text(`Áreas de Desenvolvimento:`, { underline: true });
-    doc.text(info.growth);
-    doc.moveDown(2);
-
-    doc.fontSize(14).text('Pontuação Detalhada:');
-    doc.fontSize(12)
-      .text(`- Dominância (D): ${scores.D}`)
-      .text(`- Influência (I): ${scores.I}`)
-      .text(`- Estabilidade (S): ${scores.S}`)
-      .text(`- Conformidade (C): ${scores.C}`);
-
-    // Finalizar o documento
-    doc.end();
+    // Enviar o Buffer completo de uma vez
+    return reply
+      .header('Content-Type', 'application/pdf')
+      .header('Content-Disposition', `attachment; filename=relatorio-${user.name.replace(/\s+/g, '-')}.pdf`)
+      .send(pdfBuffer);
 
   } catch (error: any) {
     app.log.error(error);
-    if (!reply.raw.headersSent) {
-      reply.status(500).send({ error: "Erro ao gerar PDF" });
-    }
+    reply.status(500).send({ error: "Erro ao gerar PDF" });
   }
 });
 
