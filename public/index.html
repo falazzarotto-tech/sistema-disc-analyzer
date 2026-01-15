@@ -100,7 +100,7 @@
                 <div class="space-y-3" id="optionsWrapper"></div>
             </div>
 
-            <!-- STEP 4: TELA DE ENCERRAMENTO (NOVA) -->
+            <!-- STEP 4: TELA DE ENCERRAMENTO -->
             <div id="step3" class="step py-6">
                 <header class="text-center mb-10">
                     <div class="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -115,34 +115,56 @@
                     <p class="text-gray-600 leading-relaxed">O que você respondeu reflete como você está funcionando neste momento, considerando contexto, desafios e energia atual.</p>
                 </section>
 
-                <section class="mb-10 px-4">
-                    <h3 class="font-bold text-sm uppercase tracking-widest text-gray-400 mb-6">O que você vai receber</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3 text-gray-700 font-medium">
-                            <span class="anima-text-coral font-bold">•</span>
-                            <span>Um Mapa de Dinâmica Psico-Comportamental</span>
-                        </li>
-                        <li class="flex items-start gap-3 text-gray-700 font-medium">
-                            <span class="anima-text-coral font-bold">•</span>
-                            <span>Uma leitura integrada do seu estado atual</span>
-                        </li>
-                        <li class="flex items-start gap-3 text-gray-700 font-medium">
-                            <span class="anima-text-coral font-bold">•</span>
-                            <span>Orientações práticas, sem rótulos</span>
-                        </li>
-                    </ul>
-                    <p class="text-[11px] text-gray-400 mt-6 italic">O resultado não define quem você é — ele amplia consciência sobre o agora.</p>
-                </section>
-
                 <div class="text-center mb-10">
                     <p class="text-xs text-gray-400 loading-pulse">Estamos organizando e integrando suas respostas...</p>
                 </div>
 
                 <footer class="text-center">
                     <p class="text-gray-900 font-bold mb-6">Mudança começa por consciência.<br><span class="anima-text-coral">Você já deu o primeiro passo.</span></p>
-                    <button id="btnDownload" class="w-full py-5 anima-coral text-white font-bold pill-button shadow-2xl hover:scale-[1.02]">Ver meu resultado</button>
-                    <p class="text-[11px] text-gray-400 mt-4">Você poderá revisitar este mapa sempre que quiser.</p>
+                    <button onclick="showStep('stepReport')" class="w-full py-5 anima-coral text-white font-bold pill-button shadow-2xl">Ver meu resultado</button>
                 </footer>
+            </div>
+
+            <!-- STEP 5: TELA DE APRESENTAÇÃO DO RELATÓRIO (NOVA) -->
+            <div id="stepReport" class="step py-6">
+                <section class="mb-10">
+                    <h1 class="text-3xl font-black tracking-tight leading-tight mb-2">Seu Mapa de Dinâmica <span class="anima-text-coral">Psico-Comportamental</span></h1>
+                    <p class="text-gray-500 font-medium">Uma leitura integrada do seu funcionamento no momento atual.</p>
+                </section>
+
+                <section class="space-y-8">
+                    <div class="border-l-4 border-[#F85E5E] pl-6">
+                        <h2 class="font-bold text-lg mb-2">Este relatório não descreve quem você é.</h2>
+                        <p class="text-gray-600 text-sm leading-relaxed">Ele mostra como você está funcionando agora, considerando comportamento, decisões, emoções e contexto. Mudanças de fase de vida ou nível de pressão podem alterar este mapa.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4">
+                        <h3 class="font-bold text-sm uppercase tracking-widest text-gray-400">O que este mapa observa</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-semibold text-gray-700">
+                            <div class="p-4 bg-gray-50 rounded-xl">• Expressão comportamental</div>
+                            <div class="p-4 bg-gray-50 rounded-xl">• Decisão e percepção</div>
+                            <div class="p-4 bg-gray-50 rounded-xl">• Regulação emocional</div>
+                            <div class="p-4 bg-gray-50 rounded-xl">• Contexto atual</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-[24px] p-6 text-sm">
+                        <h3 class="font-bold mb-3">Como interpretar os indicadores</h3>
+                        <p class="text-gray-600 leading-relaxed mb-4">Os indicadores indicam níveis de intensidade e integração. Valores mais altos não são “melhores” em todos os contextos.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-white rounded-full border border-gray-200 text-[10px] font-bold">PONTOS DE FORÇA</span>
+                            <span class="px-3 py-1 bg-white rounded-full border border-gray-200 text-[10px] font-bold">ZONAS DE ATENÇÃO</span>
+                            <span class="px-3 py-1 bg-white rounded-full border border-gray-200 text-[10px] font-bold">AJUSTES POSSÍVEIS</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center py-6">
+                        <p class="text-gray-900 font-medium italic mb-2">"Você não é o seu mapa. O mapa existe para te orientar."</p>
+                        <p class="text-gray-400 text-[11px]">Leia com curiosidade, não com julgamento.</p>
+                    </div>
+
+                    <button id="btnFinalDownload" class="w-full py-5 bg-black text-white font-bold pill-button shadow-2xl">Acessar meu relatório</button>
+                </section>
             </div>
 
         </div>
@@ -236,7 +258,7 @@
             wrapper.appendChild(btn);
         });
 
-        const progress = (currentQuestionIndex / questions.length) * 100;
+        const progress = (currentQuestionIndex / questions.length)  100;
         document.getElementById('progressBar').style.width = progress + '%';
         document.getElementById('progressPercent').innerText = Math.round(progress) + '%';
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -270,7 +292,7 @@
 
     async function submitTest() {
         await fetch('/disc/answers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, answers: userAnswers }) });
-        document.getElementById('btnDownload').onclick = () => { window.location.href = `/disc/${currentUser.id}/pdf`; };
+        document.getElementById('btnFinalDownload').onclick = () => { window.location.href = `/disc/${currentUser.id}/pdf`; };
         document.getElementById('progressWrapper').classList.add('hidden');
         showStep('step3');
     }
@@ -278,6 +300,7 @@
     function showStep(id) {
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>
 </body>
