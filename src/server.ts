@@ -5,51 +5,16 @@ import { z } from 'zod';
 const app = Fastify({ logger: true });
 const prisma = new PrismaClient();
 
-// Dicionário de Interpretação DISC
 const DISC_INTERPRETATION: Record<string, any> = {
-  D: {
-    name: "Dominância (Executor)",
-    traits: "Direto, decidido, focado em resultados e competitivo.",
-    strengths: "Tomada de decisão rápida, aceita desafios, foca na eficiência.",
-    growth: "Pode ser impaciente e negligenciar detalhes ou sentimentos alheios."
-  },
-  I: {
-    name: "Influência (Comunicador)",
-    traits: "Entusiasta, otimista, persuasivo e sociável.",
-    strengths: "Ótimo em networking, motiva equipes, comunica ideias com facilidade.",
-    growth: "Pode ter dificuldade com organização e foco em tarefas repetitivas."
-  },
-  S: {
-    name: "Estabilidade (Planejador)",
-    traits: "Calmo, paciente, leal e bom ouvinte.",
-    strengths: "Trabalha bem em equipe, cria ambientes harmoniosos, é persistente.",
-    growth: "Pode ter resistência a mudanças bruscas e dificuldade em dizer não."
-  },
-  C: {
-    name: "Conformidade (Analista)",
-    traits: "Preciso, analítico, detalhista e disciplinado.",
-    strengths: "Alta qualidade técnica, segue processos, evita riscos desnecessários.",
-    growth: "Pode ser excessivamente crítico e se perder em detalhes (perfeccionismo)."
-  }
+  D: { name: "Dominância (Executor)", traits: "Direto, decidido, focado em resultados.", strengths: "Decisão rápida.", growth: "Impaciência." },
+  I: { name: "Influência (Comunicador)", traits: "Otimista, persuasivo, sociável.", strengths: "Networking.", growth: "Falta de foco." },
+  S: { name: "Estabilidade (Planejador)", traits: "Calmo, paciente, leal.", strengths: "Trabalho em equipe.", growth: "Resistência a mudanças." },
+  C: { name: "Conformidade (Analista)", traits: "Preciso, analítico, disciplinado.", strengths: "Qualidade técnica.", growth: "Perfeccionismo." }
 };
 
-app.get('/health', async () => {
-  return { status: "ok", service: "Sistema DISC Analyzer" };
-});
+app.get('/health', async () => ({ status: "ok" }));
 
-app.get('/users', async () => {
-  return await prisma.user.findMany();
-});
-
-app.post('/users', async (request, reply) => {
-  try {
-    const UserSchema = z.object({ name: z.string(), email: z.string().email() });
-    const data = UserSchema.parse(request.body);
-    return await prisma.user.create({ data });
-  } catch (error: any) {
-    reply.status(400).send({ error: error.message });
-  }
-});
+app.get('/users', async () => await prisma.user.findMany());
 
 app.post('/disc/answers', async (request, reply) => {
   try {
@@ -64,6 +29,7 @@ app.post('/disc/answers', async (request, reply) => {
 
     const { userId, answers } = AnswerSchema.parse(request.body);
 
+    // 1. Salva as respostas
     await prisma.discAnswer.createMany({
       data: answers.map(a => ({
         userId,
@@ -73,17 +39,20 @@ app.post('/disc/answers', async (request, reply) => {
       }))
     });
 
+    // 2. Busca as somas
     const results = await prisma.discAnswer.groupBy({
       by: ['dimension'],
       where: { userId },
       _sum: { score: true }
     });
 
-    const scores = results.reduce((acc: any, curr) => {
-      acc[curr.dimension] = curr._sum.score;
-      return acc;
-    }, { D: 0, I: 0, S: 0, C: 0 });
+    // 3. Consolida os scores
+    const scores: any = { D: 0, I: 0, S: 0, C: 0 };
+    results.forEach(res => {
+      if (res.dimension) scores[res.dimension] = res._sum.score || 0;
+    });
 
+    // 4. Define o dominante
     const dominant = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
 
     return {
@@ -93,17 +62,19 @@ app.post('/disc/answers', async (request, reply) => {
     };
 
   } catch (error: any) {
-    reply.status(500).send({ error: "Erro ao processar teste" });
+    app.log.error(error); // Isso vai mostrar o erro real nos logs da Railway
+    reply.status(500).send({ 
+      error: "Erro ao processar teste", 
+      details: error.message 
+    });
   }
 });
 
 const start = async () => {
   try {
-    const port = Number(process.env.PORT) || 3000;
-    await app.listen({ port, host: '0.0.0.0' });
+    await app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' });
   } catch (err) {
     process.exit(1);
   }
 };
-
 start();
