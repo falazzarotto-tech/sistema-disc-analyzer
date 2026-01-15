@@ -1,3 +1,4 @@
+cat > src/server.ts <<'EOF'
 import Fastify from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
@@ -61,7 +62,8 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
     `;
 
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      executablePath: '/nix/store/*-chromium-*/bin/chromium',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     });
     const page = await browser.newPage();
     await page.setContent(htmlContent);
@@ -69,7 +71,7 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
     await browser.close();
 
     reply
-      .header('Content-Type', 'application/json')
+      .header('Content-Type', 'application/pdf')
       .header('Content-Disposition', 'attachment; filename=relatorio-disc.pdf')
       .send(pdfBuffer);
 
@@ -98,3 +100,4 @@ app.post('/disc/answers', async (request, reply) => {
 });
 
 app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' });
+EOF
