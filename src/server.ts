@@ -2,8 +2,27 @@ import Fastify from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
-const app = Fastify({ logger: true });
+const app = Fastify({ 
+  logger: true,
+  connectionTimeout: 30000 // Dá mais tempo para o banco responder
+});
+
 const prisma = new PrismaClient();
+
+// Rota de Teste Simples (Não usa banco)
+app.get('/', async () => {
+  return { status: "Sistema DISC Online", timestamp: new Date().toISOString() };
+});
+
+// Rota: Listar Usuários
+app.get('/users', async () => {
+  try {
+    const users = await prisma.user.findMany();
+    return users;
+  } catch (error) {
+    return { error: "Erro ao acessar banco de dados", details: error };
+  }
+});
 
 // Esquemas de Validação
 const UserSchema = z.object({
@@ -11,53 +30,28 @@ const UserSchema = z.object({
   email: z.string().email(),
 });
 
-const AnswerSchema = z.object({
-  userId: z.string().uuid(),
-  answers: z.array(z.object({
-    question_id: z.number(),
-    dimension: z.enum(['D', 'I', 'S', 'C']),
-    score: z.number().min(0)
-  }))
-});
-
 // Rota: Criar Usuário
 app.post('/users', async (request, reply) => {
-  const data = UserSchema.parse(request.body);
-  const user = await prisma.user.create({ data });
-  return user;
-});
-
-// Rota: Salvar Respostas
-app.post('/disc/answers', async (request, reply) => {
-  const { userId, answers } = AnswerSchema.parse(request.body);
-  const operations = answers.map(a => prisma.discAnswer.create({
-    data: { userId, questionId: a.question_id, dimension: a.dimension, score: a.score }
-  }));
-  await Promise.all(operations);
-  return { message: "Respostas processadas" };
-});
-
-// Rota: Ver Resultado (Consolidação)
-app.get('/disc/:userId', async (request, reply) => {
-  const { userId } = request.params as { userId: string };
-  const results = await prisma.discAnswer.groupBy({
-    by: ['dimension'],
-    where: { userId },
-    _sum: { score: true }
-  });
-  const scores: any = { D: 0, I: 0, S: 0, C: 0 };
-  results.forEach(r => { scores[r.dimension] = r._sum.score || 0; });
-  const dominant = Object.entries(scores).reduce((a, b) => (a[1] >= b[1] ? a : b))[0];
-  return { user_id: userId, scores, dominant };
+  try {
+    const data = UserSchema.parse(request.body);
+    const user = await prisma.user.create({ data });
+    return user;
+  } catch (error) {
+    reply.status(400).send(error);
+  }
 });
 
 const start = async () => {
   try {
     const port = Number(process.env.PORT) || 3000;
-    await app.listen({ port, host: '0.0.0.0' });
-    console.log("🚀 Servidor DISC rodando!");
+    const host = '0.0.0.0'; // Obrigatório para Railway
+
+    await app.listen({ port, host });
+    console.log(`🚀 Servidor DISC rodando na porta ${port}`);
   } catch (err) {
+    app.log.error(err);
     process.exit(1);
   }
 };
+
 start();
