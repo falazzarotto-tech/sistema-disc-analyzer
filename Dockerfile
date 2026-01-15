@@ -38,26 +38,3 @@ RUN apt-get update && apt-get install -y \
     libxrender1 \
     libxtst6 \
     --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Copia arquivos de dependências
-COPY package*.json ./
-
-# Instala dependências (incluindo o Prisma)
-RUN npm install
-
-# Copia o restante dos arquivos (incluindo a pasta prisma)
-COPY . .
-
-# Gera o cliente do Prisma explicitamente apontando para o arquivo
-RUN npx prisma generate --schema=./prisma/schema.prisma
-
-# Compila o TypeScript
-RUN npm run build
-
-EXPOSE 3000
-
-# Comando para rodar: sincroniza banco e inicia o servidor
-CMD ["sh", "-c", "npx prisma db push && npm start"]
