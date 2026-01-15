@@ -1,17 +1,17 @@
 {
   "name": "sistema_disc",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Sistema de Análise DISC com API REST",
+  "main": "dist/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "tsx src/server.ts",
+    "start": "node dist/server.js",
     "dev": "tsx src/server.ts",
     "postinstall": "prisma generate"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["disc", "api", "fastify", "prisma"],
+  "author": "Fernando Lazzarotto",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
