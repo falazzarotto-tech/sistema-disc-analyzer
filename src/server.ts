@@ -1,3 +1,5 @@
+console.log("DEBUG: O arquivo server.ts começou a ser executado!");
+
 import Fastify from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
@@ -7,6 +9,11 @@ const app = Fastify({
 });
 
 const prisma = new PrismaClient();
+
+// Rota de Teste Simples (Health Check)
+app.get('/health', async () => {
+  return { ok: true, timestamp: new Date().toISOString() };
+});
 
 // Rota de Teste Simples
 app.get('/', async () => {

@@ -48,13 +48,14 @@ COPY package*.json ./
 # 3. Copia a pasta prisma ANTES do npm install
 COPY prisma ./prisma
 
-# 4. Instala as dependências do projeto
+# 4. Instala as dependências do projeto (incluindo tsx globalmente)
 RUN npm install
+RUN npm install -g tsx
 
 # 5. Copia o restante dos arquivos do seu Mac para o servidor
 COPY . .
 
-# 6. Compila o código TypeScript para JavaScript
+# 6. Compila o código TypeScript para JavaScript (mantido por segurança)
 RUN npm run build
 
 # 7. Informa a porta que o sistema vai usar
