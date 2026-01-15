@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:22.12.0-bookworm
 
 # Instala dependências necessárias para o PDF
 RUN apt-get update && apt-get install -y \
