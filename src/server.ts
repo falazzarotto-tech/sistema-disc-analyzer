@@ -9,38 +9,45 @@ import fs from 'fs';
 const app = Fastify({ logger: true });
 const prisma = new PrismaClient();
 
-// Servir arquivos estáticos da pasta public
 app.register(fastifyStatic, {
   root: path.join(process.cwd(), 'public'),
   prefix: '/', 
 });
 
-const DISC_INTERPRETATION: Record<string, any> = {
-  D: { name: "Dominância (Executor)", traits: "Direto, decidido, focado em resultados e desafios.", strengths: "Tomada de decisão rápida e visão estratégica.", growth: "Desenvolver paciência e escuta ativa." },
-  I: { name: "Influência (Comunicador)", traits: "Otimista, persuasivo, sociável e entusiasta.", strengths: "Capacidade de networking e motivação de times.", growth: "Foco em detalhes e organização de processos." },
-  S: { name: "Estabilidade (Planejador)", traits: "Calmo, paciente, leal e bom ouvinte.", strengths: "Trabalho em equipe e consistência na entrega.", growth: "Agilidade em mudanças e assertividade em conflitos." },
-  C: { name: "Conformidade (Analista)", traits: "Preciso, analítico, disciplinado e detalhista.", strengths: "Qualidade técnica e conformidade com regras.", growth: "Flexibilidade e redução do perfeccionismo excessivo." }
+// Nova estrutura de interpretação baseada em Dinâmicas
+const DYNAMICS_INTERPRETATION: Record<string, any> = {
+  D: { name: "Dinâmica de Dominância", traits: "Tendência a operar com foco em resultados, rapidez e enfrentamento de desafios.", strengths: "Zonas de Alta Alocação: Decisões estratégicas e ambientes de alta pressão.", growth: "Ajustes de Alavancagem: Praticar a escuta ativa e reduzir a impulsividade." },
+  I: { name: "Dinâmica de Influência", traits: "Tendência a operar através da conexão, entusiasmo e persuasão.", strengths: "Zonas de Alta Alocação: Networking, motivação de times e comunicação.", growth: "Ajustes de Alavancagem: Foco em processos e detalhamento técnico." },
+  S: { name: "Dinâmica de Estabilidade", traits: "Tendência a operar com consistência, lealdade e ritmo cadenciado.", strengths: "Zonas de Alta Alocação: Planejamento, suporte e ambientes colaborativos.", growth: "Ajustes de Alavancagem: Flexibilidade para mudanças rápidas." },
+  C: { name: "Dinâmica de Conformidade", traits: "Tendência a operar com precisão, disciplina e rigor analítico.", strengths: "Zonas de Alta Alocação: Qualidade, análise de dados e conformidade.", growth: "Ajustes de Alavancagem: Redução do perfeccionismo e abertura ao risco." }
 };
 
 app.post('/users', async (request) => {
-  const { name, email } = z.object({ name: z.string(), email: z.string().email() }).parse(request.body);
-  return await prisma.user.create({ data: { name, email } });
+  const { name, email, context } = z.object({ 
+    name: z.string(), 
+    email: z.string().email(),
+    context: z.string().optional()
+  }).parse(request.body);
+  
+  return await prisma.user.create({ 
+    data: { name, email, context: context || "Profissional" } 
+  });
 });
 
 app.get('/disc/:userId/pdf', async (request, reply) => {
   const { userId } = request.params as { userId: string };
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    const results = await prisma.discAnswer.groupBy({ by: ['dimension'], where: { userId }, _sum: { score: true } });
+    const results = await prisma.answer.groupBy({ by: ['dimension'], where: { userId }, _sum: { score: true } });
 
-    if (!user || results.length === 0) return reply.status(404).send({ error: "Dados não encontrados" });
+    if (!user || results.length === 0) return reply.status(404).send({ error: "Mapa não encontrado" });
 
     const scores: any = { D: 0, I: 0, S: 0, C: 0 };
     results.forEach(res => { scores[res.dimension] = res._sum.score || 0; });
     const dominant = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-    const info = DISC_INTERPRETATION[dominant];
+    const info = DYNAMICS_INTERPRETATION[dominant];
 
-    const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
+    const pdfBuffer = await new Promise<Buffer>((resolve) => {
       const doc = new PDFDocument({ margin: 0, size: 'A4' });
       const chunks: Buffer[] = [];
       doc.on('data', (chunk) => chunks.push(chunk));
@@ -48,53 +55,39 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
 
       const publicPath = path.join(process.cwd(), 'public');
 
-      // --- PÁGINA 1: CAPA ---
+      // CAPA
       const coverPath = path.join(publicPath, 'cover-chain.png');
-      if (fs.existsSync(coverPath)) {
-        doc.image(coverPath, 0, 0, { width: 595, height: 842 });
-      } else {
-        doc.rect(0, 0, 595, 842).fill('#F1F5F9'); // Fundo reserva se imagem sumir
-      }
-
-      const logoPath = path.join(publicPath, 'cover-logo.png');
-      if (fs.existsSync(logoPath)) {
-        doc.image(logoPath, 60, 60, { width: 150 });
-      }
-
-      doc.fillColor('#000000').fontSize(32).font('Helvetica-Bold').text('Relatório de Perfil', 60, 480);
-      doc.fillColor('#F85E5E').text('Comportamental', 60, 520);
-      doc.fillColor('#000000').fontSize(20).text(user.name.toUpperCase(), 60, 600);
-
-      // --- PÁGINA 2: CONTEÚDO ---
-      doc.addPage({ margin: 50 });
+      if (fs.existsSync(coverPath)) doc.image(coverPath, 0, 0, { width: 595, height: 842 });
       
-      const bar1Path = path.join(publicPath, 'bar1.png');
-      if (fs.existsSync(bar1Path)) doc.image(bar1Path, 0, 0, { width: 595, height: 15 });
+      const logoPath = path.join(publicPath, 'cover-logo.png');
+      if (fs.existsSync(logoPath)) doc.image(logoPath, 60, 60, { width: 150 });
 
-      doc.moveDown(4);
-      doc.fillColor('#F85E5E').fontSize(10).font('Helvetica-Bold').text('RESULTADO');
-      doc.fillColor('#000000').fontSize(26).text(info.name);
+      doc.fillColor('#000000').fontSize(28).font('Helvetica-Bold').text('Mapa de Dinâmica', 60, 480);
+      doc.fillColor('#F85E5E').text('Psico-Comportamental', 60, 515);
+      doc.fillColor('#64748B').fontSize(12).font('Helvetica').text(`CONTEXTO: ${user.context.toUpperCase()}`, 60, 560);
+      doc.fillColor('#000000').fontSize(18).font('Helvetica-Bold').text(user.name.toUpperCase(), 60, 585);
 
+      // PÁGINA 2
+      doc.addPage({ margin: 50 });
+      doc.fillColor('#000000').fontSize(20).font('Helvetica-Bold').text('Estado Psico-Comportamental Atual');
+      doc.moveDown();
+      doc.fillColor('#F85E5E').fontSize(14).text(info.name);
+      doc.fillColor('#334155').fontSize(11).font('Helvetica').text(info.traits, { width: 480 });
+      
       doc.moveDown(2);
-      ['D', 'I', 'S', 'C'].forEach(d => {
-        const barWidth = (scores[d] / 15) * 350;
-        doc.fillColor('#64748B').fontSize(10).text(d, 50, doc.y + 10);
-        doc.rect(80, doc.y - 10, 350, 12).fill('#F1F5F9');
-        doc.rect(80, doc.y - 10, Math.max(barWidth, 5), 12).fill('#F85E5E');
-        doc.moveDown(1.2);
-      });
+      doc.fillColor('#F85E5E').fontSize(12).font('Helvetica-Bold').text(info.strengths);
+      doc.moveDown();
+      doc.text(info.growth);
 
       doc.end();
     });
 
     return reply
       .header('Content-Type', 'application/pdf')
-      .header('Content-Disposition', `attachment; filename=Relatorio-${userId}.pdf`)
+      .header('Content-Disposition', `attachment; filename=Mapa-Dinamica-${user.name}.pdf`)
       .send(pdfBuffer);
-
   } catch (err) {
-    app.log.error(err);
-    reply.status(500).send({ error: "Erro interno ao gerar PDF" });
+    reply.status(500).send({ error: "Erro ao gerar Mapa" });
   }
 });
 
@@ -104,12 +97,12 @@ app.post('/disc/answers', async (request) => {
     answers: z.array(z.object({ questionId: z.number(), dimension: z.enum(['D', 'I', 'S', 'C']), score: z.number() }))
   }).parse(request.body);
 
-  await prisma.discAnswer.createMany({ data: answers.map(a => ({ userId, questionId: a.questionId, dimension: a.dimension, score: a.score })) });
-  const results = await prisma.discAnswer.groupBy({ by: ['dimension'], where: { userId }, _sum: { score: true } });
+  await prisma.answer.createMany({ data: answers.map(a => ({ userId, questionId: a.questionId, dimension: a.dimension, score: a.score })) });
+  const results = await prisma.answer.groupBy({ by: ['dimension'], where: { userId }, _sum: { score: true } });
   const scores: any = { D: 0, I: 0, S: 0, C: 0 };
   results.forEach(res => { scores[res.dimension] = res._sum.score || 0; });
   const dominant = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-  return { userId, scores, profile: DISC_INTERPRETATION[dominant] };
+  return { userId, scores, profile: DYNAMICS_INTERPRETATION[dominant] };
 });
 
 app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' });

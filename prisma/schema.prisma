@@ -8,18 +8,19 @@ datasource db {
 }
 
 model User {
-  id      String       @id @default(uuid())
-  name    String
-  email   String       @unique
-  answers DiscAnswer[]
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  context   String   @default("Profissional") // Novo campo para a dinâmica contextual
+  createdAt DateTime @default(now())
+  answers   Answer[]
 }
 
-model DiscAnswer {
+model Answer {
   id         String   @id @default(uuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
   questionId Int
-  dimension  String
+  dimension  String   // D, I, S, C (Camadas de Marston)
   score      Int
-  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
 }
