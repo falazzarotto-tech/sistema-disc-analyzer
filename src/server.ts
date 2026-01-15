@@ -1,8 +1,7 @@
 import Fastify from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import puppeteer from 'puppeteer';
-import { execSync } from 'child_process';
+import PDFDocument from 'pdfkit';
 
 const app = Fastify({ logger: true });
 const prisma = new PrismaClient();
@@ -13,16 +12,6 @@ const DISC_INTERPRETATION: Record<string, any> = {
   S: { name: "Estabilidade (Planejador)", traits: "Calmo, paciente, leal.", strengths: "Trabalho em equipe.", growth: "Resistência a mudanças." },
   C: { name: "Conformidade (Analista)", traits: "Preciso, analítico, disciplinado.", strengths: "Qualidade técnica.", growth: "Perfeccionismo." }
 };
-
-// Função para encontrar o Chromium do sistema
-function getChromiumPath(): string {
-  try {
-    const path = execSync('which chromium || which chromium-browser || which google-chrome').toString().trim();
-    return path;
-  } catch {
-    return ''; // Se não encontrar, deixa o Puppeteer tentar o padrão
-  }
-}
 
 app.get('/health', async () => ({ status: "ok" }));
 app.get('/users', async () => await prisma.user.findMany());
@@ -46,47 +35,47 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
     const dominant = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
     const info = DISC_INTERPRETATION[dominant];
 
-    const htmlContent = `
-      <html>
-        <body style="font-family: Arial; padding: 40px;">
-          <h1 style="color: #2c3e50;">Relatório de Perfil DISC</h1>
-          <p><strong>Nome:</strong> ${user.name}</p>
-          <hr>
-          <h2>Seu Perfil Dominante: ${info.name}</h2>
-          <p><strong>Características:</strong> ${info.traits}</p>
-          <p><strong>Pontos Fortes:</strong> ${info.strengths}</p>
-          <p><strong>Áreas de Desenvolvimento:</strong> ${info.growth}</p>
-          <br>
-          <h3>Pontuação Detalhada:</h3>
-          <ul>
-            <li>Dominância: ${scores.D}</li>
-            <li>Influência: ${scores.I}</li>
-            <li>Estabilidade: ${scores.S}</li>
-            <li>Conformidade: ${scores.C}</li>
-          </ul>
-        </body>
-      </html>
-    `;
-
-    const chromiumPath = getChromiumPath();
-    const launchOptions: any = {
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-    };
+    const doc = new PDFDocument({ margin: 50 });
     
-    if (chromiumPath) {
-      launchOptions.executablePath = chromiumPath;
-    }
-
-    const browser = await puppeteer.launch(launchOptions);
-    const page = await browser.newPage();
-    await page.setContent(htmlContent);
-    const pdfBuffer = await page.pdf({ format: 'A4' });
-    await browser.close();
-
     reply
       .header('Content-Type', 'application/pdf')
-      .header('Content-Disposition', 'attachment; filename=relatorio-disc.pdf')
-      .send(pdfBuffer);
+      .header('Content-Disposition', `attachment; filename=relatorio-${user.name.replace(/\s+/g, '-')}.pdf`);
+
+    doc.pipe(reply.raw);
+
+    // Cabeçalho
+    doc.fontSize(25).text('Relatório de Perfil DISC', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(14).text(`Candidato: ${user.name}`);
+    doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`);
+    doc.moveDown();
+    doc.path('M 50 150 L 550 150').stroke();
+    doc.moveDown();
+
+    // Resultado Principal
+    doc.fontSize(18).fillColor('#2c3e50').text(`Perfil Dominante: ${info.name}`);
+    doc.moveDown(0.5);
+    doc.fontSize(12).fillColor('black').text(`Características:`, { underline: true });
+    doc.text(info.traits);
+    doc.moveDown();
+
+    doc.fontSize(12).text(`Pontos Fortes:`, { underline: true });
+    doc.text(info.strengths);
+    doc.moveDown();
+
+    doc.fontSize(12).text(`Áreas de Desenvolvimento:`, { underline: true });
+    doc.text(info.growth);
+    doc.moveDown(2);
+
+    // Tabela de Pontos
+    doc.fontSize(14).text('Pontuação Detalhada:');
+    doc.fontSize(12)
+      .text(`- Dominância (D): ${scores.D}`)
+      .text(`- Influência (I): ${scores.I}`)
+      .text(`- Estabilidade (S): ${scores.S}`)
+      .text(`- Conformidade (C): ${scores.C}`);
+
+    doc.end();
 
   } catch (error: any) {
     reply.status(500).send({ error: "Erro ao gerar PDF", details: error.message });
