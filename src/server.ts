@@ -35,14 +35,19 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
     const dominant = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
     const info = DISC_INTERPRETATION[dominant];
 
+    // Criar o documento
     const doc = new PDFDocument({ margin: 50 });
     
-    reply
-      .header('Content-Type', 'application/pdf')
-      .header('Content-Disposition', `attachment; filename=relatorio-${user.name.replace(/\s+/g, '-')}.pdf`);
+    // Configurar os headers
+    reply.raw.writeHead(200, {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=relatorio-${user.name.replace(/\s+/g, '-')}.pdf`
+    });
 
+    // Conectar o PDF à resposta do servidor
     doc.pipe(reply.raw);
 
+    // Conteúdo do PDF
     doc.fontSize(25).text('Relatório de Perfil DISC', { align: 'center' });
     doc.moveDown();
     doc.fontSize(14).text(`Candidato: ${user.name}`);
@@ -72,10 +77,14 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
       .text(`- Estabilidade (S): ${scores.S}`)
       .text(`- Conformidade (C): ${scores.C}`);
 
+    // Finalizar o documento
     doc.end();
 
   } catch (error: any) {
-    reply.status(500).send({ error: "Erro ao gerar PDF", details: error.message });
+    app.log.error(error);
+    if (!reply.raw.headersSent) {
+      reply.status(500).send({ error: "Erro ao gerar PDF" });
+    }
   }
 });
 
