@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste DISC - Análise Comportamental</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f9; color: #333; display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 600px; width: 100%; }
+        h1 { color: #2c3e50; text-align: center; }
+        .step { display: none; }
+        .step.active { display: block; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background: #2980b9; }
+        .question { margin-bottom: 25px; padding: 15px; border-bottom: 1px solid #eee; }
+        .result-card { text-align: center; padding: 20px; background: #e8f4fd; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Passo 1: Cadastro -->
+    <div id="step1" class="step active">
+        <h1>Inicie seu Teste DISC</h1>
+        <p>Preencha seus dados para começar a análise.</p>
+        <input type="text" id="userName" placeholder="Seu Nome Completo">
+        <input type="email" id="userEmail" placeholder="Seu Melhor E-mail">
+        <button onclick="startTest()">Começar Teste</button>
+    </div>
+
+    <!-- Passo 2: Perguntas -->
+    <div id="step2" class="step">
+        <h1>Responda com Sinceridade</h1>
+        <div id="questionsContainer">
+            <!-- As perguntas serão inseridas aqui via JS -->
+        </div>
+        <button onclick="submitTest()">Finalizar e Ver Resultado</button>
+    </div>
+
+    <!-- Passo 3: Resultado -->
+    <div id="step3" class="step">
+        <div class="result-card">
+            <h1>Seu Perfil é: <span id="dominantProfile">...</span></h1>
+            <p id="profileDesc"></p>
+            <button id="btnDownload" style="background: #27ae60;">Baixar Relatório em PDF</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+    const questions = [
+        { id: 1, text: "Em situações de pressão, você foca em resultados rápidos?", dim: "D" },
+        { id: 2, text: "Você gosta de influenciar e entusiasmar as pessoas ao seu redor?", dim: "I" },
+        { id: 3, text: "Você prefere ambientes calmos e rotinas bem definidas?", dim: "S" },
+        { id: 4, text: "Você é extremamente atento a detalhes e regras técnicas?", dim: "C" }
+    ];
+
+    async function startTest() {
+        const name = document.getElementById('userName').value;
+        const email = document.getElementById('userEmail').value;
+        
+        if(!name || !email) return alert("Preencha os dados!");
+
+        const response = await fetch('/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email })
+        });
+        
+        currentUser = await response.json();
+        
+        // Renderizar perguntas
+        const container = document.getElementById('questionsContainer');
+        questions.forEach(q => {
+            container.innerHTML += `
+                <div class="question">
+                    <p>${q.text}</p>
+                    <select id="q-${q.id}">
+                        <option value="1">Discordo Totalmente</option>
+                        <option value="2">Discordo</option>
+                        <option value="3">Neutro</option>
+                        <option value="4">Concordo</option>
+                        <option value="5">Concordo Totalmente</option>
+                    </select>
+                </div>
+            `;
+        });
+
+        showStep(2);
+    }
+
+    async function submitTest() {
+        const answers = questions.map(q => ({
+            questionId: q.id,
+            dimension: q.dim,
+            score: parseInt(document.getElementById(`q-${q.id}`).value)
+        }));
+
+        const response = await fetch('/disc/answers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: currentUser.id, answers })
+        });
+
+        const result = await response.json();
+        
+        document.getElementById('dominantProfile').innerText = result.profile.name;
+        document.getElementById('profileDesc').innerText = result.profile.traits;
+        
+        document.getElementById('btnDownload').onclick = () => {
+            window.location.href = `/disc/${currentUser.id}/pdf`;
+        };
+
+        showStep(3);
+    }
+
+    function showStep(n) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + n).classList.add('active');
+    }
+</script>
+
+</body>
+</html>
