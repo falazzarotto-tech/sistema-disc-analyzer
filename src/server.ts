@@ -1,4 +1,3 @@
-cat > src/server.ts <<'EOF'
 import Fastify from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
@@ -17,10 +16,8 @@ const DISC_INTERPRETATION: Record<string, any> = {
 app.get('/health', async () => ({ status: "ok" }));
 app.get('/users', async () => await prisma.user.findMany());
 
-// ROTA PARA GERAR PDF
 app.get('/disc/:userId/pdf', async (request, reply) => {
   const { userId } = request.params as { userId: string };
-
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     const results = await prisma.discAnswer.groupBy({
@@ -38,7 +35,6 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
     const dominant = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
     const info = DISC_INTERPRETATION[dominant];
 
-    // HTML do Relatório
     const htmlContent = `
       <html>
         <body style="font-family: Arial; padding: 40px;">
@@ -62,7 +58,6 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
     `;
 
     const browser = await puppeteer.launch({
-      executablePath: '/nix/store/*-chromium-*/bin/chromium',
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     });
     const page = await browser.newPage();
@@ -80,7 +75,6 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
   }
 });
 
-// Rota de respostas (mantida)
 app.post('/disc/answers', async (request, reply) => {
   try {
     const { userId, answers } = z.object({
@@ -99,5 +93,11 @@ app.post('/disc/answers', async (request, reply) => {
   }
 });
 
-app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' });
-EOF
+const start = async () => {
+  try {
+    await app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' });
+  } catch (err) {
+    process.exit(1);
+  }
+};
+start();
