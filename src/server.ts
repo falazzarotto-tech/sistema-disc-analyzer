@@ -13,6 +13,10 @@ fastify.post('/users', async (request, reply) => {
 
 fastify.post('/disc/answers', async (request, reply) => {
   const { userId, answers } = request.body as any;
+  
+  // Deletar respostas anteriores se existirem (para permitir re-teste)
+  await prisma.discAnswer.deleteMany({ where: { userId } });
+
   await prisma.discAnswer.createMany({
     data: answers.map((a: any) => ({
       userId,
