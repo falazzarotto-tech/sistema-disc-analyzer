@@ -3,13 +3,12 @@ import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
 const app = Fastify({ 
-  logger: true,
-  connectionTimeout: 30000 // Dá mais tempo para o banco responder
+  logger: true
 });
 
 const prisma = new PrismaClient();
 
-// Rota de Teste Simples (Não usa banco)
+// Rota de Teste Simples
 app.get('/', async () => {
   return { status: "Sistema DISC Online", timestamp: new Date().toISOString() };
 });
@@ -24,7 +23,7 @@ app.get('/users', async () => {
   }
 });
 
-// Esquemas de Validação
+// Esquema de Validação
 const UserSchema = z.object({
   name: z.string(),
   email: z.string().email(),
@@ -44,7 +43,7 @@ app.post('/users', async (request, reply) => {
 const start = async () => {
   try {
     const port = Number(process.env.PORT) || 3000;
-    const host = '0.0.0.0'; // Obrigatório para Railway
+    const host = '0.0.0.0'; 
 
     await app.listen({ port, host });
     console.log(`🚀 Servidor DISC rodando na porta ${port}`);
