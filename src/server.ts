@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import puppeteer from 'puppeteer';
+import { execSync } from 'child_process';
 
 const app = Fastify({ logger: true });
 const prisma = new PrismaClient();
@@ -12,6 +13,16 @@ const DISC_INTERPRETATION: Record<string, any> = {
   S: { name: "Estabilidade (Planejador)", traits: "Calmo, paciente, leal.", strengths: "Trabalho em equipe.", growth: "Resistência a mudanças." },
   C: { name: "Conformidade (Analista)", traits: "Preciso, analítico, disciplinado.", strengths: "Qualidade técnica.", growth: "Perfeccionismo." }
 };
+
+// Função para encontrar o Chromium do sistema
+function getChromiumPath(): string {
+  try {
+    const path = execSync('which chromium || which chromium-browser || which google-chrome').toString().trim();
+    return path;
+  } catch {
+    return ''; // Se não encontrar, deixa o Puppeteer tentar o padrão
+  }
+}
 
 app.get('/health', async () => ({ status: "ok" }));
 app.get('/users', async () => await prisma.user.findMany());
@@ -57,9 +68,16 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
       </html>
     `;
 
-    const browser = await puppeteer.launch({
+    const chromiumPath = getChromiumPath();
+    const launchOptions: any = {
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-    });
+    };
+    
+    if (chromiumPath) {
+      launchOptions.executablePath = chromiumPath;
+    }
+
+    const browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
     await page.setContent(htmlContent);
     const pdfBuffer = await page.pdf({ format: 'A4' });
