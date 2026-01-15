@@ -1,6 +1,6 @@
 FROM node:22.12.0-bookworm
 
-# Instala dependências para o PDF e Chrome
+# 1. Instala dependências para o PDF e Chrome (essencial para o Puppeteer)
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -38,3 +38,27 @@ RUN apt-get update && apt-get install -y \
     libxrender1 \
     libxtst6 \
     --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# 2. Copia arquivos de dependências
+COPY package*.json ./
+
+# 3. Copia a pasta prisma ANTES do npm install
+COPY prisma ./prisma
+
+# 4. Instala as dependências do projeto
+RUN npm install
+
+# 5. Copia o restante dos arquivos do seu Mac para o servidor
+COPY . .
+
+# 6. Compila o código TypeScript para JavaScript
+RUN npm run build
+
+# 7. Informa a porta que o sistema vai usar
+EXPOSE 3000
+
+# 8. Comando para ligar o servidor
+CMD ["npm", "start"]
