@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Análise de Dinâmica Psico-Comportamental | Anima</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
         :root {
-            --anima-red: #E30613; /* Vermelho Padrão Anima */
+            --anima-red: #E30613;
             --apple-black: #1d1d1f;
             --apple-gray: #86868b;
             --apple-bg: #ffffff;
+            --apple-border: #d2d2d7;
         }
 
         body { 
@@ -24,161 +26,203 @@
         }
 
         .apple-container {
-            max-width: 680px;
+            max-width: 860px;
             margin: 0 auto;
-            padding: 80px 20px;
+            padding: 80px 24px;
         }
 
-        /* Estilo de Botão Apple */
         .btn-anima {
             background-color: var(--anima-red);
             color: white;
-            padding: 12px 24px;
-            border-radius: 980px; /* Botão pílula Apple */
-            font-weight: 500;
+            padding: 18px 48px;
+            border-radius: 980px;
+            font-weight: 600;
+            font-size: 1.1rem;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .btn-anima:hover {
             background-color: #b3050f;
             transform: scale(1.02);
+            box-shadow: 0 12px 40px rgba(227, 6, 19, 0.15);
         }
 
-        /* Escala de Resposta Estilo Apple */
+        /* Escala Vertical Minimalista */
+        .scale-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
         .scale-dot {
-            width: 50px;
-            height: 50px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            border: 1px solid #d2d2d7;
+            border: 1px solid var(--apple-border);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 500;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
             transition: all 0.2s ease;
-            cursor: pointer;
+            background: white;
         }
+
         .scale-dot:hover {
             border-color: var(--anima-red);
             color: var(--anima-red);
-        }
-
-        .context-card {
-            border: 1px solid #d2d2d7;
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .context-card:hover {
-            border-color: var(--anima-red);
             background-color: #fff5f5;
         }
 
-        input[type="radio"]:checked + span {
-            color: var(--anima-red);
+        .scale-label {
+            font-size: 0.85rem;
             font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 6px;
+            color: var(--apple-black);
         }
 
-        .animate-delay { animation-delay: 0.5s; }
+        .scale-desc {
+            font-size: 0.75rem;
+            color: var(--apple-gray);
+            line-height: 1.4;
+            max-width: 120px;
+        }
+
+        /* Cards de Contexto Minimalistas */
+        .context-card {
+            border: 1px solid var(--apple-border);
+            border-radius: 14px;
+            padding: 24px 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .context-card:hover {
+            border-color: var(--apple-black);
+            background-color: #fafafa;
+        }
+        .context-card input:checked + .icon-box {
+            color: var(--anima-red);
+        }
+
+        .icon-box {
+            color: var(--apple-gray);
+            transition: color 0.3s ease;
+        }
+
+        .animate-delay { animation-delay: 0.4s; }
     </style>
 </head>
 <body>
     <div class="apple-container">
         
         <!-- LOGO ANIMA -->
-        <div class="flex justify-center mb-16 animate__animated animate__fadeIn">
-            <img src="./logo-anima.png" alt="Anima Logo" class="h-12 object-contain">
+        <div class="flex justify-center mb-20 animate__animated animate__fadeIn">
+            <img src="./logo-anima.png" alt="Anima Logo" class="h-14 object-contain">
         </div>
 
-        <!-- BLOCO 1 & 2 — INTRODUÇÃO (ESTILO APPLE KEYNOTE) -->
-        <header class="text-center mb-20">
-            <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-6 animate__animated animate__fadeInUp">
+        <!-- TÍTULO E INTRODUÇÃO -->
+        <header class="text-center mb-24">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-8 animate__animated animate__fadeInUp">
                 Análise de Dinâmica <br><span style="color: var(--anima-red);">Psico-Comportamental</span>
             </h1>
-            <div class="max-w-xl mx-auto space-y-4 text-lg md:text-xl text-gray-500 font-medium animate__animated animate__fadeInUp animate-delay">
+            <div class="max-w-2xl mx-auto space-y-6 text-lg md:text-xl text-gray-500 font-medium animate__animated animate__fadeInUp animate-delay">
                 <p>Este não é um teste de personalidade.</p>
                 <p>Buscamos compreender como você está funcionando agora, considerando comportamento, decisões, emoções e contexto.</p>
                 <p class="text-black">Não existem respostas certas ou erradas — apenas percepções honestas.</p>
             </div>
         </header>
 
-        <!-- BLOCO 3 — COMO FUNCIONA -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24 text-center animate__animated animate__fadeIn">
-            <div>
-                <span class="text-3xl mb-2 block">💬</span>
-                <p class="text-sm font-semibold">Responda afirmações simples</p>
-            </div>
-            <div>
-                <span class="text-3xl mb-2 block">🎯</span>
-                <p class="text-sm font-semibold">Escolha seu momento atual</p>
-            </div>
-            <div>
-                <span class="text-3xl mb-2 block">🗺️</span>
-                <p class="text-sm font-semibold">Receba um mapa de insights</p>
-            </div>
-        </section>
-
-        <!-- BLOCO 4 — CONTEXTO -->
-        <section class="mb-24">
-            <h2 class="text-2xl font-bold mb-2">Em qual contexto você está respondendo?</h2>
-            <p class="text-gray-500 mb-8">Essa informação ajuda a ajustar a forma de leitura do resultado.</p>
+        <!-- CONTEXTO COM ÍCONES MINIMALISTAS -->
+        <section class="mb-32">
+            <h2 class="text-xl font-semibold mb-10 text-center">Em qual contexto você está respondendo?</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label class="context-card flex items-center">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <label class="context-card">
                     <input type="radio" name="context" class="hidden">
-                    <span class="text-lg">Desenvolvimento profissional</span>
+                    <div class="icon-box"><i data-lucide="briefcase" size="24"></i></div>
+                    <span class="text-xs font-medium text-center">Desenvolvimento Profissional</span>
                 </label>
-                <label class="context-card flex items-center">
+                <label class="context-card">
                     <input type="radio" name="context" class="hidden">
-                    <span class="text-lg">Processo seletivo</span>
+                    <div class="icon-box"><i data-lucide="user-plus" size="24"></i></div>
+                    <span class="text-xs font-medium text-center">Processo Seletivo</span>
                 </label>
-                <label class="context-card flex items-center">
+                <label class="context-card">
                     <input type="radio" name="context" class="hidden">
-                    <span class="text-lg">Autoconhecimento</span>
+                    <div class="icon-box"><i data-lucide="compass" size="24"></i></div>
+                    <span class="text-xs font-medium text-center">Autoconhecimento</span>
                 </label>
-                <label class="context-card flex items-center">
+                <label class="context-card">
                     <input type="radio" name="context" class="hidden">
-                    <span class="text-lg">Relacionamento / casal</span>
+                    <div class="icon-box"><i data-lucide="heart" size="24"></i></div>
+                    <span class="text-xs font-medium text-center">Relacionamento</span>
                 </label>
             </div>
         </section>
 
-        <!-- BLOCO 5 — ESCALA -->
-        <section class="mb-24 bg-gray-50 rounded-3xl p-10">
-            <h2 class="text-2xl font-bold mb-2">📏 Como responder</h2>
-            <p class="text-gray-500 mb-10">Considere como você tem funcionado recentemente.</p>
+        <!-- ESCALA ALINHADA (ESTILO APPLE) -->
+        <section class="mb-32">
+            <div class="flex items-center gap-2 mb-4">
+                <i data-lucide="info" size="18" class="text-gray-400"></i>
+                <h2 class="text-xl font-semibold">Como responder</h2>
+            </div>
+            <p class="text-gray-500 mb-16 text-sm">Considere como você tem funcionado recentemente.</p>
             
-            <div class="flex justify-between items-center mb-12">
-                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Discordo totalmente</span>
-                <div class="flex gap-3">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-10 md:gap-2">
+                <div class="scale-item">
                     <div class="scale-dot">1</div>
-                    <div class="scale-dot">2</div>
-                    <div class="scale-dot">3</div>
-                    <div class="scale-dot">4</div>
-                    <div class="scale-dot">5</div>
+                    <div class="scale-label">Discordo totalmente</div>
+                    <div class="scale-desc">Quase nunca acontece comigo.</div>
                 </div>
-                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Concordo totalmente</span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-gray-500">
-                <div><strong>1 — Discordo totalmente</strong><br>Quase nunca acontece comigo.</div>
-                <div><strong>2 — Discordo parcialmente</strong><br>Acontece raramente.</div>
-                <div><strong>3 — Neutro / Depende</strong><br>Varia conforme o contexto.</div>
-                <div><strong>4 — Concordo parcialmente</strong><br>Na maioria das vezes.</div>
-                <div class="md:col-span-2"><strong>5 — Concordo totalmente</strong><br>Acontece quase sempre.</div>
+                <div class="scale-item">
+                    <div class="scale-dot">2</div>
+                    <div class="scale-label">Discordo parcialmente</div>
+                    <div class="scale-desc">Acontece raramente.</div>
+                </div>
+                <div class="scale-item">
+                    <div class="scale-dot">3</div>
+                    <div class="scale-label">Neutro / Depende</div>
+                    <div class="scale-desc">Varia conforme o contexto.</div>
+                </div>
+                <div class="scale-item">
+                    <div class="scale-dot">4</div>
+                    <div class="scale-label">Concordo parcialmente</div>
+                    <div class="scale-desc">Na maioria das vezes.</div>
+                </div>
+                <div class="scale-item">
+                    <div class="scale-dot">5</div>
+                    <div class="scale-label">Concordo totalmente</div>
+                    <div class="scale-desc">Acontece quase sempre.</div>
+                </div>
             </div>
         </section>
 
-        <!-- BLOCO 6 & 7 -->
-        <footer class="text-center">
-            <p class="text-xs text-gray-400 mb-10 uppercase tracking-widest">
+        <!-- FOOTER & CTA -->
+        <footer class="text-center border-t border-gray-100 pt-16">
+            <p class="text-[10px] text-gray-400 mb-12 uppercase tracking-[0.2em] font-medium">
                 Confidencial • Sem diagnóstico clínico • Reflete um momento
             </p>
-            <button class="btn-anima text-xl px-12 py-5 shadow-2xl shadow-red-500/20">
+            <button class="btn-anima">
                 Iniciar análise
             </button>
-            <p class="text-sm text-gray-400 mt-6">Duração média: 6 a 8 minutos</p>
+            <div class="flex justify-center items-center gap-2 mt-8 text-gray-400">
+                <i data-lucide="clock" size="14"></i>
+                <p class="text-xs">Duração média: 6 a 8 minutos</p>
+            </div>
         </footer>
 
     </div>
+
+    <script>
+        // Inicializa os ícones Lucide
+        lucide.createIcons();
+    </script>
 </body>
 </html>
