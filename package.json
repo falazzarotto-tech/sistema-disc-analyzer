@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx src/server.ts",
     "build": "tsc && cp -R public dist/public",
-    "start": "npm run build && npx prisma db push --accept-data-loss && node dist/server.js"
+    "start": "prisma generate && node dist/server.js"
   },
   "dependencies": {
     "@fastify/static": "^9.0.0",
