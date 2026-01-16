@@ -38,7 +38,7 @@
                     <button type="button" data-value="Carreira" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Carreira</button>
                 </div>
             </div>
-            <button type="submit" class="w-full bg-black text-white rounded-2xl py-4 font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">COMEÇAR AVALIAÇÃO</button>
+            <button type="submit" id="startBtn" class="w-full bg-black text-white rounded-2xl py-4 font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">COMEÇAR AVALIAÇÃO</button>
         </form>
 
         <!-- PASSO 2: PERGUNTAS -->
@@ -68,7 +68,6 @@
     </div>
 
     <script>
-        let userId = '';
         let currentQuestion = 0;
         let answers = [];
         const questions = [
@@ -78,6 +77,9 @@
             { id: 4, text: "Analiso profundamente o contexto antes de agir.", dim: "Contexto" }
         ];
 
+        // Limpa qualquer ID antigo ao carregar a página
+        localStorage.removeItem('anima_user_id');
+
         document.querySelectorAll('.btn-context').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.btn-context').forEach(b => b.classList.remove('active'));
@@ -85,60 +87,87 @@
             });
         });
 
-        const nameInput = document.getElementById('name');
-        const emailInput = document.getElementById('email');
-        nameInput.addEventListener('input', () => { nameInput.value = nameInput.value.toUpperCase(); });
-        emailInput.addEventListener('input', () => { emailInput.value = emailInput.value.toLowerCase(); });
-
         document.getElementById('userForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const context = document.querySelector('.btn-context.active')?.dataset.value;
             if(!context) return alert('Selecione um contexto');
 
-            const res = await fetch('/users', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name: nameInput.value, email: emailInput.value, context })
-            });
-            const user = await res.json();
-            userId = user.id;
-            
-            document.getElementById('userForm').classList.add('hidden');
-            document.getElementById('questionBox').classList.remove('hidden');
-            document.getElementById('stepTitle').innerText = "Responda com sinceridade.";
-            nextQuestion();
+            const btn = document.getElementById('startBtn');
+            btn.disabled = true;
+            btn.innerText = "PROCESSANDO...";
+
+            try {
+                const res = await fetch('/users', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        name: document.getElementById('name').value.toUpperCase(), 
+                        email: document.getElementById('email').value.toLowerCase(), 
+                        context 
+                    })
+                });
+                const user = await res.json();
+                
+                // TRAVA O ID NO NAVEGADOR
+                localStorage.setItem('anima_user_id', user.id);
+                
+                document.getElementById('userForm').classList.add('hidden');
+                document.getElementById('questionBox').classList.remove('hidden');
+                document.getElementById('stepTitle').innerText = "Responda com sinceridade.";
+                showQuestion();
+            } catch (err) {
+                alert('Erro de conexão. Tente novamente.');
+                btn.disabled = false;
+                btn.innerText = "COMEÇAR AVALIAÇÃO";
+            }
         });
 
-        function nextQuestion() {
-            if(currentQuestion < questions.length) {
-                document.getElementById('questionText').innerText = questions[currentQuestion].text;
-            } else {
-                finish();
-            }
+        function showQuestion() {
+            document.getElementById('questionText').innerText = questions[currentQuestion].text;
         }
 
         document.querySelectorAll('.btn-score').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const score = parseInt(btn.dataset.score);
-                answers.push({ questionId: questions[currentQuestion].id, dimension: questions[currentQuestion].dim, score });
+                answers.push({ 
+                    questionId: questions[currentQuestion].id, 
+                    dimension: questions[currentQuestion].dim, 
+                    score 
+                });
+                
                 currentQuestion++;
-                nextQuestion();
+                if(currentQuestion < questions.length) {
+                    showQuestion();
+                } else {
+                    await finish();
+                }
             });
         });
 
         async function finish() {
-            await fetch('/disc/answers', {
+            const userId = localStorage.getItem('anima_user_id');
+            document.getElementById('questionBox').innerHTML = '<p class="text-center font-bold">Salvando sua análise...</p>';
+
+            const response = await fetch('/disc/answers', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ userId, answers })
             });
-            document.getElementById('questionBox').classList.add('hidden');
-            document.getElementById('finalBox').classList.remove('hidden');
-            document.getElementById('stepTitle').innerText = "Tudo pronto!";
+            
+            if(response.ok) {
+                document.getElementById('questionBox').classList.add('hidden');
+                document.getElementById('finalBox').classList.remove('hidden');
+                document.getElementById('stepTitle').innerText = "Tudo pronto!";
+            } else {
+                alert('Erro ao salvar. Por favor, recarregue a página.');
+            }
         }
 
         document.getElementById('downloadBtn').addEventListener('click', () => {
-            window.location.href = `/disc/${userId}/pdf`;
+            const userId = localStorage.getItem('anima_user_id');
+            if(userId) {
+                window.location.href = `/disc/${userId}/pdf`;
+            }
         });
     </script>
 </body>
