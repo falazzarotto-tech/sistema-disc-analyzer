@@ -3,305 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ânima | Dinâmica Psico-Comportamental</title>
+    <title>Ânima - Análise DISC</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #FFFFFF; color: #1A1A1A; -webkit-font-smoothing: antialiased; }
-        .anima-coral { background-color: #F85E5E; }
-        .anima-text-coral { color: #F85E5E; }
-        .pill-button { border-radius: 50px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .step { display: none; opacity: 0; transform: translateY(10px); transition: all 0.5s ease; }
-        .step.active { display: block; opacity: 1; transform: translateY(0); }
-        .option-card { border-radius: 16px; border: 1px solid #E5E7EB; transition: all 0.2s ease; cursor: pointer; text-align: left; width: 100%; padding: 20px 24px; margin-bottom: 12px; background: white; }
-        .option-card:hover { border-color: #F85E5E; background-color: #FFF5F5; transform: translateX(4px); }
-        .progress-fill { background-color: #F85E5E; transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1); }
-        .context-pill { border: 1px solid #E5E7EB; padding: 12px 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-weight: 500; text-align: center; }
-        .context-pill.selected { background-color: #1A1A1A; color: white; border-color: #1A1A1A; }
-        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .loading-pulse { animation: pulse-soft 2s infinite ease-in-out; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+        .btn-context.active { background-color: #F85E5E; color: white; border-color: #F85E5E; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center">
-    
-    <header class="max-w-4xl w-full py-8 px-6 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <div class="w-7 h-7 anima-coral rounded-full flex items-center justify-center">
-                <span class="text-white font-bold text-[10px]">Â</span>
-            </div>
-            <span class="font-extrabold text-lg tracking-tighter">ânima</span>
-        </div>
-    </header>
-
-    <main class="max-w-2xl w-full px-6 pb-20">
-        
-        <div id="progressWrapper" class="hidden mb-12">
-            <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">
-                <span id="blockName">Mapeamento</span>
-                <span id="progressPercent">0%</span>
-            </div>
-            <div class="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
-                <div id="progressBar" class="progress-fill h-full w-0"></div>
-            </div>
+<body class="p-6">
+    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+        <div class="mb-8">
+            <h1 class="text-2xl font-extrabold tracking-tight">ânima<span class="text-[#F85E5E]">.</span></h1>
+            <p class="text-gray-500 text-sm">Inicie sua análise de dinâmica comportamental.</p>
         </div>
 
-        <div id="mainContent">
-            
-            <!-- STEP 1: TELA INICIAL -->
-            <div id="step1" class="step active">
-                <section class="mb-10">
-                    <h1 class="text-4xl font-extrabold tracking-tight leading-tight mb-2">Análise de Dinâmica <span class="anima-text-coral">Psico-Comportamental</span></h1>
-                    <p class="text-gray-500 font-medium">Uma leitura do seu funcionamento no momento atual.</p>
-                </section>
-
-                <section class="bg-gray-50 rounded-[32px] p-8 mb-8 border border-gray-100">
-                    <h2 class="font-bold text-lg mb-3">Este não é um teste de personalidade.</h2>
-                    <p class="text-gray-600 leading-relaxed mb-4">Aqui buscamos compreender como você está funcionando agora, considerando comportamento, decisões, emoções e contexto.</p>
-                    <p class="text-gray-600 font-semibold italic">Não existem respostas certas ou erradas — apenas percepções honestas.</p>
-                </section>
-
-                <section class="mb-10">
-                    <label class="block font-bold text-gray-900 mb-4">Em qual contexto você está respondendo?</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="contextOptions">
-                        <div class="context-pill" onclick="selectContext('Profissional', this)">Desenvolvimento Profissional</div>
-                        <div class="context-pill" onclick="selectContext('Seletivo', this)">Processo Seletivo</div>
-                        <div class="context-pill" onclick="selectContext('Autoconhecimento', this)">Autoconhecimento</div>
-                        <div class="context-pill" onclick="selectContext('Relacional', this)">Relacionamento / Casal</div>
-                    </div>
-                </section>
-
-                <section class="space-y-4 mb-12">
-                    <input type="text" id="userName" class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#F85E5E]" placeholder="Seu nome completo">
-                    <input type="email" id="userEmail" class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#F85E5E]" placeholder="Seu melhor e-mail">
-                </section>
-
-                <button onclick="startTest()" class="w-full py-5 bg-black text-white font-bold pill-button shadow-xl">Iniciar análise</button>
+        <form id="userForm" class="space-y-6">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Nome Completo</label>
+                <input type="text" id="name" required class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 transition-all">
             </div>
 
-            <!-- STEP 2: TRANSIÇÃO DE BLOCO -->
-            <div id="stepTransition" class="step text-center py-10">
-                <div class="mb-8">
-                    <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.2em]">Você concluiu este bloco ✓</span>
-                    <div class="w-32 h-1 bg-gray-100 mx-auto mt-4 rounded-full overflow-hidden">
-                        <div class="anima-coral h-full w-full"></div>
-                    </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">E-mail</label>
+                <input type="email" id="email" required class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 transition-all">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Contexto da Análise</label>
+                <div class="grid grid-cols-2 gap-3" id="contextGroup">
+                    <button type="button" data-value="Autoconhecimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-sm font-semibold hover:border-gray-200 transition-all">Autoconhecimento</button>
+                    <button type="button" data-value="Desenvolvimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-sm font-semibold hover:border-gray-200 transition-all">Desenvolvimento</button>
+                    <button type="button" data-value="Seletivo" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-sm font-semibold hover:border-gray-200 transition-all">Processo Seletivo</button>
+                    <button type="button" data-value="Carreira" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-sm font-semibold hover:border-gray-200 transition-all">Carreira</button>
                 </div>
-                <h2 id="transitionTitle" class="text-3xl font-extrabold text-gray-900 mb-4 leading-tight px-6">...</h2>
-                <p id="transitionText" class="text-gray-500 text-sm mb-12">Não pense demais. Escolha a opção que mais se aproxima do seu momento atual.</p>
-                <button onclick="resumeTest()" class="w-full py-5 bg-black text-white font-bold pill-button shadow-xl">Continuar</button>
             </div>
 
-            <!-- STEP 3: TELA DE PERGUNTAS -->
-            <div id="step2" class="step">
-                <header class="mb-10">
-                    <span id="qNumber" class="anima-text-coral font-bold text-[10px] uppercase tracking-[0.2em]">Questão 1</span>
-                    <h2 id="qText" class="text-2xl font-extrabold text-gray-900 mt-3 leading-tight">...</h2>
-                </header>
-                <div class="space-y-3" id="optionsWrapper"></div>
-            </div>
+            <button type="submit" class="w-full bg-black text-white rounded-2xl py-4 font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">
+                Começar Avaliação
+            </button>
+        </form>
+    </div>
 
-            <!-- STEP 4: TELA DE ENCERRAMENTO -->
-            <div id="step3" class="step py-6">
-                <header class="text-center mb-10">
-                    <div class="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                    <h1 class="text-3xl font-black text-gray-900 mb-2">Análise concluída</h1>
-                    <p class="text-gray-400 text-sm">Obrigado por dedicar este tempo à sua reflexão.</p>
-                </header>
-
-                <section class="bg-gray-50 rounded-[32px] p-8 mb-8 border border-gray-100">
-                    <h2 class="font-bold text-lg mb-3">Não existe resultado certo ou errado.</h2>
-                    <p class="text-gray-600 leading-relaxed">O que você respondeu reflete como você está funcionando neste momento, considerando contexto, desafios e energia atual.</p>
-                </section>
-
-                <div class="text-center mb-10">
-                    <p class="text-xs text-gray-400 loading-pulse">Estamos organizando e integrando suas respostas...</p>
-                </div>
-
-                <footer class="text-center">
-                    <p class="text-gray-900 font-bold mb-6">Mudança começa por consciência.<br><span class="anima-text-coral">Você já deu o primeiro passo.</span></p>
-                    <button onclick="showStep('stepReport')" class="w-full py-5 anima-coral text-white font-bold pill-button shadow-2xl">Ver meu resultado</button>
-                </footer>
-            </div>
-
-            <!-- STEP 5: TELA DE APRESENTAÇÃO DO RELATÓRIO (NOVA) -->
-            <div id="stepReport" class="step py-6">
-                <section class="mb-10">
-                    <h1 class="text-3xl font-black tracking-tight leading-tight mb-2">Seu Mapa de Dinâmica <span class="anima-text-coral">Psico-Comportamental</span></h1>
-                    <p class="text-gray-500 font-medium">Uma leitura integrada do seu funcionamento no momento atual.</p>
-                </section>
-
-                <section class="space-y-8">
-                    <div class="border-l-4 border-[#F85E5E] pl-6">
-                        <h2 class="font-bold text-lg mb-2">Este relatório não descreve quem você é.</h2>
-                        <p class="text-gray-600 text-sm leading-relaxed">Ele mostra como você está funcionando agora, considerando comportamento, decisões, emoções e contexto. Mudanças de fase de vida ou nível de pressão podem alterar este mapa.</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-4">
-                        <h3 class="font-bold text-sm uppercase tracking-widest text-gray-400">O que este mapa observa</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-semibold text-gray-700">
-                            <div class="p-4 bg-gray-50 rounded-xl">• Expressão comportamental</div>
-                            <div class="p-4 bg-gray-50 rounded-xl">• Decisão e percepção</div>
-                            <div class="p-4 bg-gray-50 rounded-xl">• Regulação emocional</div>
-                            <div class="p-4 bg-gray-50 rounded-xl">• Contexto atual</div>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 rounded-[24px] p-6 text-sm">
-                        <h3 class="font-bold mb-3">Como interpretar os indicadores</h3>
-                        <p class="text-gray-600 leading-relaxed mb-4">Os indicadores indicam níveis de intensidade e integração. Valores mais altos não são “melhores” em todos os contextos.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-3 py-1 bg-white rounded-full border border-gray-200 text-[10px] font-bold">PONTOS DE FORÇA</span>
-                            <span class="px-3 py-1 bg-white rounded-full border border-gray-200 text-[10px] font-bold">ZONAS DE ATENÇÃO</span>
-                            <span class="px-3 py-1 bg-white rounded-full border border-gray-200 text-[10px] font-bold">AJUSTES POSSÍVEIS</span>
-                        </div>
-                    </div>
-
-                    <div class="text-center py-6">
-                        <p class="text-gray-900 font-medium italic mb-2">"Você não é o seu mapa. O mapa existe para te orientar."</p>
-                        <p class="text-gray-400 text-[11px]">Leia com curiosidade, não com julgamento.</p>
-                    </div>
-
-                    <button id="btnFinalDownload" class="w-full py-5 bg-black text-white font-bold pill-button shadow-2xl">Acessar meu relatório</button>
-                </section>
-            </div>
-
-        </div>
-    </main>
-
-<script>
-    let currentUser = null; let currentQuestionIndex = 0; let userAnswers = []; let selectedContext = null;
-    
-    const blocks = [
-        { id: "Atitude", title: "Agora vamos falar sobre sua atitude e energia.", text: "Responda considerando como você tem funcionado recentemente." },
-        { id: "Percepção", title: "Agora vamos falar sobre como você percebe a realidade.", text: "Não existe resposta certa ou errada." },
-        { id: "Decisão", title: "Agora vamos falar sobre como você toma decisões.", text: "Se ficar em dúvida, escolha a opção mais próxima." },
-        { id: "Expressão", title: "Agora vamos olhar para sua forma de agir no dia a dia.", text: "Sua percepção honesta é o que mais importa." },
-        { id: "Regulação", title: "Agora vamos observar como você lida com pressão.", text: "Responda com tranquilidade." },
-        { id: "Contexto", title: "Estamos quase lá. Vamos olhar para o seu contexto atual.", text: "Falta menos de 1 minuto." },
-        { id: "Autopercepção", title: "Para finalizar, uma breve autopercepção.", text: "Uma etapa concluída. Seguimos com tranquilidade." }
-    ];
-
-    const questions = [
-        { id: 1, cat: "Atitude", text: "Costumo organizar minhas ideias enquanto converso com outras pessoas." },
-        { id: 2, cat: "Atitude", text: "Prefiro refletir com calma antes de me posicionar." },
-        { id: 3, cat: "Atitude", text: "Interações frequentes me estimulam profissionalmente." },
-        { id: 4, cat: "Atitude", text: "Preciso de momentos de silêncio para manter clareza mental." },
-        { id: 5, cat: "Percepção", text: "Dou mais valor ao que é concreto e comprovável do que a possibilidades futuras." },
-        { id: 6, cat: "Percepção", text: "Consigo perceber oportunidades ou riscos antes que fiquem evidentes." },
-        { id: 7, cat: "Percepção", text: "Sinto-me mais confortável lidando com rotinas bem definidas." },
-        { id: 8, cat: "Percepção", text: "Ideias novas me energizam mais do que a repetição de processos." },
-        { id: 9, cat: "Decisão", text: "Ao decidir, priorizo lógica e critérios objetivos." },
-        { id: 10, cat: "Decisão", text: "Considero o impacto das decisões nas pessoas envolvidas." },
-        { id: 11, cat: "Decisão", text: "Prefiro clareza direta a preservar harmonia a qualquer custo." },
-        { id: 12, cat: "Decisão", text: "Manter boas relações é parte essencial de uma boa decisão." },
-        { id: 13, cat: "Expressão", text: "Sinto-me confortável assumindo a frente quando é preciso decidir rápido." },
-        { id: 14, cat: "Expressão", text: "Obstáculos tendem a me estimular mais do que me frear." },
-        { id: 15, cat: "Expressão", text: "Comunicar e engajar pessoas é uma das minhas principais ferramentas." },
-        { id: 16, cat: "Expressão", text: "Costumo influenciar decisões por meio do diálogo." },
-        { id: 17, cat: "Expressão", text: "Ambientes previsíveis favorecem meu desempenho." },
-        { id: 18, cat: "Expressão", text: "Mudanças frequentes tendem a me desgastar." },
-        { id: 19, cat: "Expressão", text: "Regras claras e processos bem definidos me trazem segurança." },
-        { id: 20, cat: "Expressão", text: "Prefiro analisar riscos antes de agir." },
-        { id: 21, cat: "Regulação", text: "Sob pressão, consigo manter clareza antes de reagir." },
-        { id: 22, cat: "Regulação", text: "Percebo quando minhas emoções começam a interferir nas decisões." },
-        { id: 23, cat: "Regulação", text: "Reajo de forma impulsiva quando me sinto pressionado." },
-        { id: 24, cat: "Regulação", text: "Consigo separar emoção pessoal de decisão profissional." },
-        { id: 25, cat: "Regulação", text: "Após conflitos, demoro para recuperar equilíbrio interno." },
-        { id: 26, cat: "Regulação", text: "Em situações críticas, consigo sustentar firmeza sem perder controle." },
-        { id: 27, cat: "Contexto", text: "Atualmente me sinto mais pressionado(a) do que o habitual." },
-        { id: 28, cat: "Contexto", text: "Tenho clareza sobre o que se espera de mim neste momento." },
-        { id: 29, cat: "Contexto", text: "Sinto que estou atuando em um papel alinhado às minhas forças atuais." },
-        { id: 30, cat: "Contexto", text: "O ambiente em que estou hoje favorece meu desempenho." },
-        { id: 31, cat: "Autopercepção", text: "Sinto que estou funcionando de forma sustentável neste momento." },
-        { id: 32, cat: "Autopercepção", text: "Acredito que pequenos ajustes poderiam melhorar significativamente meu desempenho." }
-    ];
-
-    const options = [
-        { val: 5, label: "5 — Concordo totalmente", sub: "Acontece quase sempre." },
-        { val: 4, label: "4 — Concordo parcialmente", sub: "Acontece na maioria das vezes." },
-        { val: 3, label: "3 — Neutro / Depende", sub: "Acontece às vezes, varia conforme o contexto." },
-        { val: 2, label: "2 — Discordo parcialmente", sub: "Acontece raramente." },
-        { val: 1, label: "1 — Discordo totalmente", sub: "Quase nunca acontece comigo." }
-    ];
-
-    function selectContext(ctx, el) {
-        selectedContext = ctx;
-        document.querySelectorAll('.context-pill').forEach(p => p.classList.remove('selected'));
-        el.classList.add('selected');
-    }
-
-    async function startTest() {
-        const name = document.getElementById('userName').value;
-        const email = document.getElementById('userEmail').value;
-        if(!name || !email || !selectedContext) return alert("Preencha todos os campos.");
-        const response = await fetch('/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, context: selectedContext }) });
-        currentUser = await response.json();
-        document.getElementById('progressWrapper').classList.remove('hidden');
-        showStep('step2'); renderQuestion();
-    }
-
-    function renderQuestion() {
-        const q = questions[currentQuestionIndex];
-        document.getElementById('blockName').innerText = q.cat.toUpperCase();
-        document.getElementById('qNumber').innerText = `Questão ${currentQuestionIndex + 1} de ${questions.length}`;
-        document.getElementById('qText').innerText = q.text;
+    <script>
+        let selectedContext = '';
+        const buttons = document.querySelectorAll('.btn-context');
         
-        const wrapper = document.getElementById('optionsWrapper');
-        wrapper.innerHTML = '';
-        options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'option-card flex justify-between items-center';
-            btn.onclick = () => selectOption(opt.val);
-            btn.innerHTML = `<div><span class="block font-bold">${opt.label}</span><span class="text-xs text-gray-400 font-medium">${opt.sub}</span></div>`;
-            wrapper.appendChild(btn);
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedContext = btn.getAttribute('data-value');
+            });
         });
 
-        const progress = (currentQuestionIndex / questions.length)  100;
-        document.getElementById('progressBar').style.width = progress + '%';
-        document.getElementById('progressPercent').innerText = Math.round(progress) + '%';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!selectedContext) return alert('Por favor, selecione um contexto.');
 
-    async function selectOption(score) {
-        const currentCat = questions[currentQuestionIndex].cat;
-        userAnswers.push({ questionId: questions[currentQuestionIndex].id, dimension: currentCat, score: score });
-        
-        if (currentQuestionIndex < questions.length - 1) {
-            currentQuestionIndex++;
-            const nextCat = questions[currentQuestionIndex].cat;
-            if (nextCat !== currentCat) showTransition(nextCat);
-            else renderQuestion();
-        } else {
-            submitTest();
-        }
-    }
+            const data = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                context: selectedContext
+            };
 
-    function showTransition(category) {
-        const block = blocks.find(b => b.id === category);
-        document.getElementById('transitionTitle').innerText = block.title;
-        document.getElementById('transitionText').innerText = block.text;
-        showStep('stepTransition');
-    }
-
-    function resumeTest() {
-        showStep('step2');
-        renderQuestion();
-    }
-
-    async function submitTest() {
-        await fetch('/disc/answers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, answers: userAnswers }) });
-        document.getElementById('btnFinalDownload').onclick = () => { window.location.href = `/disc/${currentUser.id}/pdf`; };
-        document.getElementById('progressWrapper').classList.add('hidden');
-        showStep('step3');
-    }
-
-    function showStep(id) {
-        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-</script>
+            try {
+                const response = await fetch('/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const user = await response.json();
+                alert('Usuário criado! ID: ' + user.id);
+                // Aqui redirecionaríamos para as perguntas
+            } catch (err) {
+                alert('Erro ao conectar com o servidor.');
+            }
+        });
+    </script>
 </body>
 </html>

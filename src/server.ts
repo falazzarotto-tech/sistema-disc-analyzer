@@ -1,9 +1,16 @@
 import Fastify from 'fastify';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { generateDiscPdf } from './pdfService';
 
 const prisma = new PrismaClient();
 const fastify = Fastify({ logger: true });
+
+fastify.register(fastifyStatic, {
+  root: path.join(__dirname, '../public'),
+  prefix: '/',
+});
 
 fastify.post('/users', async (request, reply) => {
   const { name, email, context } = request.body as any;
@@ -13,10 +20,7 @@ fastify.post('/users', async (request, reply) => {
 
 fastify.post('/disc/answers', async (request, reply) => {
   const { userId, answers } = request.body as any;
-  
-  // Deletar respostas anteriores se existirem (para permitir re-teste)
   await prisma.discAnswer.deleteMany({ where: { userId } });
-
   await prisma.discAnswer.createMany({
     data: answers.map((a: any) => ({
       userId,
@@ -44,8 +48,12 @@ fastify.get('/disc/:userId/pdf', async (request, reply) => {
     avg: s._avg.score
   }));
 
-  const pdf = await generateDiscPdf(user, formattedScores);
-  reply.type('application/pdf').send(pdf);
+  try {
+    const pdf = await generateDiscPdf(user, formattedScores);
+    reply.type('application/pdf').send(pdf);
+  } catch (err) {
+    reply.status(500).send({ error: 'Erro ao gerar Mapa' });
+  }
 });
 
 const start = async () => {
