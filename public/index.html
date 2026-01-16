@@ -3,94 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ânima - Análise</title>
+    <title>Ânima - Análise de Dinâmica Comportamental</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+        .btn-context.active, .btn-score.active { background-color: #F85E5E; color: white; border-color: #F85E5E; }
+    </style>
 </head>
-<body class="p-6 bg-gray-50">
-    <div class="max-w-md mx-auto bg-white rounded-3xl p-8 shadow-sm border mt-10">
+<body class="p-6">
+    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mt-10">
         <div class="text-center mb-8">
-            <img src="/logo-anima.png" class="w-40 mx-auto mb-4">
-            <h2 id="stepTitle" class="text-gray-500 text-sm uppercase font-bold">Cadastro</h2>
+            <img src="/logo-anima.png" alt="Ânima" class="w-48 mx-auto mb-4 object-contain">
+            <h2 class="text-xl font-extrabold text-gray-900 mb-1">Ânima</h2>
+            <p id="stepTitle" class="text-gray-500 text-sm">Inicie sua análise de dinâmica comportamental.</p>
         </div>
 
-        <form id="userForm" class="space-y-4">
-            <input type="text" id="name" required placeholder="NOME" class="w-full border-b p-2 outline-none">
-            <input type="email" id="email" required placeholder="E-MAIL" class="w-full border-b p-2 outline-none">
-            <select id="context" class="w-full border-b p-2 outline-none bg-white">
-                <option value="Autoconhecimento">AUTOCONHECIMENTO</option>
-                <option value="Desenvolvimento">DESENVOLVIMENTO</option>
-            </select>
-            <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-bold">COMEÇAR</button>
+        <!-- PASSO 1: CADASTRO -->
+        <form id="userForm" class="space-y-6">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Nome Completo</label>
+                <input type="text" id="name" required style="text-transform: uppercase;" placeholder="EX: FERNANDO LAZZAROTTO" class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">E-mail</label>
+                <input type="email" id="email" required style="text-transform: lowercase;" placeholder="exemplo@email.com" class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Contexto da Análise</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" data-value="Autoconhecimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Autoconhecimento</button>
+                    <button type="button" data-value="Desenvolvimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Desenvolvimento</button>
+                    <button type="button" data-value="Seletivo" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Processo Seletivo</button>
+                    <button type="button" data-value="Carreira" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Carreira</button>
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-black text-white rounded-2xl py-4 font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">COMEÇAR AVALIAÇÃO</button>
         </form>
 
-        <div id="questionBox" class="hidden space-y-6">
-            <p id="questionText" class="text-center font-bold text-lg"></p>
-            <div class="flex justify-between gap-2">
-                <button class="btn-score border p-4 w-full rounded-xl font-bold" data-score="1">1</button>
-                <button class="btn-score border p-4 w-full rounded-xl font-bold" data-score="2">2</button>
-                <button class="btn-score border p-4 w-full rounded-xl font-bold" data-score="3">3</button>
-                <button class="btn-score border p-4 w-full rounded-xl font-bold" data-score="4">4</button>
-                <button class="btn-score border p-4 w-full rounded-xl font-bold" data-score="5">5</button>
+        <!-- PASSO 2: PERGUNTAS -->
+        <div id="questionBox" class="hidden space-y-8">
+            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <p id="questionText" class="text-gray-800 font-semibold text-center text-lg leading-tight"></p>
             </div>
+            <div class="flex justify-between gap-2">
+                <button class="btn-score border-2 border-gray-100 rounded-xl w-full py-4 font-bold" data-score="1">1</button>
+                <button class="btn-score border-2 border-gray-100 rounded-xl w-full py-4 font-bold" data-score="2">2</button>
+                <button class="btn-score border-2 border-gray-100 rounded-xl w-full py-4 font-bold" data-score="3">3</button>
+                <button class="btn-score border-2 border-gray-100 rounded-xl w-full py-4 font-bold" data-score="4">4</button>
+                <button class="btn-score border-2 border-gray-100 rounded-xl w-full py-4 font-bold" data-score="5">5</button>
+            </div>
+            <p class="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">1: Discordo Totalmente | 5: Concordo Totalmente</p>
         </div>
 
-        <div id="finalBox" class="hidden text-center space-y-4">
-            <h2 class="text-xl font-bold">Concluído!</h2>
-            <button id="downloadBtn" class="w-full bg-[#F85E5E] text-white py-4 rounded-xl font-bold">BAIXAR RELATÓRIO</button>
+        <!-- PASSO 3: FINALIZAÇÃO -->
+        <div id="finalBox" class="hidden text-center space-y-6">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h2 class="text-xl font-bold">Análise Concluída!</h2>
+            <p class="text-gray-500 text-sm">Seu Resumo Executivo está pronto para download.</p>
+            <button id="downloadBtn" class="w-full bg-[#F85E5E] text-white rounded-2xl py-4 font-bold shadow-lg shadow-red-100">BAIXAR RELATÓRIO ÂNIMA</button>
         </div>
     </div>
 
     <script>
         let userId = '';
-        let currentIdx = 0;
+        let currentQuestion = 0;
         let answers = [];
         const questions = [
-            { id: 1, text: "Sinto facilidade em expressar ideias.", dim: "Expressão" },
-            { id: 2, text: "Tomo decisões rápidas.", dim: "Decisão" },
-            { id: 3, text: "Sigo regras e processos.", dim: "Regulação" },
-            { id: 4, text: "Analiso o contexto antes.", dim: "Contexto" }
+            { id: 1, text: "Sinto facilidade em expressar minhas ideias e influenciar pessoas.", dim: "Expressão" },
+            { id: 2, text: "Tomo decisões de forma rápida, mesmo sob pressão.", dim: "Decisão" },
+            { id: 3, text: "Prefiro seguir processos claros e regras estabelecidas.", dim: "Regulação" },
+            { id: 4, text: "Analiso profundamente o contexto antes de agir.", dim: "Contexto" }
         ];
 
-        document.getElementById('userForm').onsubmit = async (e) => {
+        document.querySelectorAll('.btn-context').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.btn-context').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        nameInput.addEventListener('input', () => { nameInput.value = nameInput.value.toUpperCase(); });
+        emailInput.addEventListener('input', () => { emailInput.value = emailInput.value.toLowerCase(); });
+
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const context = document.querySelector('.btn-context.active')?.dataset.value;
+            if(!context) return alert('Selecione um contexto');
+
             const res = await fetch('/users', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    name: document.getElementById('name').value.toUpperCase(),
-                    email: document.getElementById('email').value.toLowerCase(),
-                    context: document.getElementById('context').value
-                })
+                body: JSON.stringify({ name: nameInput.value, email: emailInput.value, context })
             });
             const user = await res.json();
             userId = user.id;
+            
             document.getElementById('userForm').classList.add('hidden');
             document.getElementById('questionBox').classList.remove('hidden');
-            document.getElementById('stepTitle').innerText = "Avaliação";
-            showQ();
-        };
+            document.getElementById('stepTitle').innerText = "Responda com sinceridade.";
+            nextQuestion();
+        });
 
-        function showQ() {
-            document.getElementById('questionText').innerText = questions[currentIdx].text;
+        function nextQuestion() {
+            if(currentQuestion < questions.length) {
+                document.getElementById('questionText').innerText = questions[currentQuestion].text;
+            } else {
+                finish();
+            }
         }
 
         document.querySelectorAll('.btn-score').forEach(btn => {
-            btn.onclick = async () => {
-                answers.push({
-                    questionId: questions[currentIdx].id,
-                    dimension: questions[currentIdx].dim,
-                    score: parseInt(btn.dataset.score)
-                });
-                currentIdx++;
-                if(currentIdx < questions.length) {
-                    showQ();
-                } else {
-                    await save();
-                }
-            };
+            btn.addEventListener('click', async () => {
+                const score = parseInt(btn.dataset.score);
+                answers.push({ questionId: questions[currentQuestion].id, dimension: questions[currentQuestion].dim, score });
+                currentQuestion++;
+                nextQuestion();
+            });
         });
 
-        async function save() {
+        async function finish() {
             await fetch('/disc/answers', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -98,11 +134,12 @@
             });
             document.getElementById('questionBox').classList.add('hidden');
             document.getElementById('finalBox').classList.remove('hidden');
+            document.getElementById('stepTitle').innerText = "Tudo pronto!";
         }
 
-        document.getElementById('downloadBtn').onclick = () => {
+        document.getElementById('downloadBtn').addEventListener('click', () => {
             window.location.href = `/disc/${userId}/pdf`;
-        };
+        });
     </script>
 </body>
 </html>
