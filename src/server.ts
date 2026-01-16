@@ -50,7 +50,14 @@ fastify.get('/disc/:userId/pdf', async (request, reply) => {
 
   try {
     const pdf = await generateDiscPdf(user, formattedScores);
-    reply.type('application/pdf').send(pdf);
+    // Nome do arquivo: Anima_Analise_NOME_DO_USUARIO.pdf
+    const safeName = user?.name.replace(/\s+/g, '_').toUpperCase();
+    const fileName = `Anima_Analise_${safeName}.pdf`;
+    
+    reply
+      .type('application/pdf')
+      .header('Content-Disposition', `attachment; filename="${fileName}"`)
+      .send(pdf);
   } catch (err) {
     reply.status(500).send({ error: 'Erro ao gerar Mapa' });
   }
