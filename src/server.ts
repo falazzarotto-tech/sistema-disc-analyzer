@@ -7,6 +7,7 @@ import { generateDiscPdf } from './pdfService';
 const prisma = new PrismaClient();
 const fastify = Fastify({ logger: true });
 
+// Configuração crucial para as imagens funcionarem
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, '../public'),
   prefix: '/',
@@ -50,7 +51,6 @@ fastify.get('/disc/:userId/pdf', async (request, reply) => {
 
   try {
     const pdf = await generateDiscPdf(user, formattedScores);
-    // Nome do arquivo: Anima_Analise_NOME_DO_USUARIO.pdf
     const safeName = user?.name.replace(/\s+/g, '_').toUpperCase();
     const fileName = `Anima_Analise_${safeName}.pdf`;
     
