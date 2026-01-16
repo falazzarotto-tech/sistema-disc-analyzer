@@ -14,29 +14,35 @@
 <body class="p-6">
     <div class="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mt-10">
         <div class="mb-8 text-center">
-            <!-- LOGO ORIGINAL AQUI -->
-            <img src="/logo-anima.png" alt="Ânima" class="h-12 mx-auto mb-4">
+            <!-- LOGO ORIGINAL AJUSTADA -->
+            <img src="/logo_anima.png" alt="Ânima" class="h-16 mx-auto mb-4 object-contain">
             <p class="text-gray-500 text-sm">Inicie sua análise comportamental.</p>
         </div>
 
         <form id="userForm" class="space-y-6">
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Nome Completo</label>
-                <input type="text" id="name" required style="text-transform: uppercase;" class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
+                <input type="text" id="name" required 
+                    style="text-transform: uppercase;"
+                    placeholder="EX: FERNANDO LAZZAROTTO"
+                    class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
             </div>
 
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">E-mail</label>
-                <input type="email" id="email" required style="text-transform: lowercase;" class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
+                <input type="email" id="email" required 
+                    style="text-transform: lowercase;"
+                    placeholder="exemplo@email.com"
+                    class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
             </div>
 
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Contexto da Análise</label>
-                <div class="grid grid-cols-2 gap-3">
-                    <button type="button" data-value="Autoconhecimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-xs font-bold transition-all">AUTOCONHECIMENTO</button>
-                    <button type="button" data-value="Desenvolvimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-xs font-bold transition-all">DESENVOLVIMENTO</button>
-                    <button type="button" data-value="Seletivo" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-xs font-bold transition-all">PROCESSO SELETIVO</button>
-                    <button type="button" data-value="Carreira" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-xs font-bold transition-all">CARREIRA</button>
+                <div class="grid grid-cols-2 gap-3" id="contextGroup">
+                    <button type="button" data-value="Autoconhecimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold hover:border-gray-200 transition-all">AUTOCONHECIMENTO</button>
+                    <button type="button" data-value="Desenvolvimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold hover:border-gray-200 transition-all">DESENVOLVIMENTO</button>
+                    <button type="button" data-value="Seletivo" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold hover:border-gray-200 transition-all">PROCESSO SELETIVO</button>
+                    <button type="button" data-value="Carreira" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold hover:border-gray-200 transition-all">CARREIRA</button>
                 </div>
             </div>
 
@@ -46,7 +52,13 @@
         </form>
 
         <div id="resultBox" class="hidden mt-8 p-6 bg-gray-50 border border-gray-100 rounded-2xl text-center">
+            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
             <p class="text-gray-900 font-bold">Usuário Registrado!</p>
+            <p class="text-gray-500 text-xs mt-2">Copie o ID abaixo para prosseguir:</p>
             <div class="mt-4 p-3 bg-white border border-gray-200 rounded-lg text-[10px] font-mono text-gray-600 break-all" id="userIdDisplay"></div>
         </div>
     </div>
@@ -70,7 +82,8 @@
 
         document.getElementById('userForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!selectedContext) return alert('Selecione um contexto.');
+            if (!selectedContext) return alert('Por favor, selecione um contexto.');
+
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerText = 'PROCESSANDO...';
             submitBtn.disabled = true;
@@ -79,16 +92,21 @@
                 const response = await fetch('/users', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: nameInput.value, email: emailInput.value, context: selectedContext })
+                    body: JSON.stringify({
+                        name: nameInput.value,
+                        email: emailInput.value,
+                        context: selectedContext
+                    })
                 });
                 const user = await response.json();
+                
                 if (user.id) {
                     document.getElementById('userForm').classList.add('hidden');
                     document.getElementById('resultBox').classList.remove('hidden');
                     document.getElementById('userIdDisplay').innerText = user.id;
                 }
             } catch (err) {
-                alert('Erro no servidor.');
+                alert('Erro ao conectar com o servidor.');
                 submitBtn.innerText = 'COMEÇAR AVALIAÇÃO';
                 submitBtn.disabled = false;
             }
