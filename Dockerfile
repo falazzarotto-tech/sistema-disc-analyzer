@@ -1,6 +1,6 @@
 FROM node:20-bookworm
 
-# Instalar dependências do Chrome para o Puppeteer
+# Instalar dependências do Chrome
 RUN apt-get update && apt-get install -y \
   libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
   libxkbcommon0 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 \
@@ -9,21 +9,20 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copia arquivos de dependências
+# Copia apenas os arquivos de pacotes primeiro
 COPY package*.json ./
 
-# Instala dependências (incluindo o Prisma CLI)
-RUN npm install
+# Instala ignorando scripts automáticos para evitar erro prematuro do Prisma
+RUN npm install --ignore-scripts
 
-# COPIA TUDO (incluindo a pasta prisma e public)
+# AGORA copia o resto dos arquivos (incluindo a pasta prisma)
 COPY . .
 
-# Gera o cliente do Prisma explicitamente apontando para o arquivo
-RUN npx prisma generate --schema=./prisma/schema.prisma
+# Gera o Prisma manualmente agora que os arquivos existem no container
+RUN npx prisma generate
 
-# Faz o build do TypeScript
+# Build do projeto TypeScript
 RUN npm run build
 
 EXPOSE 3000
-
 CMD ["npm", "start"]
