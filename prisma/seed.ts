@@ -2,36 +2,39 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
+  console.log('🌱 Populando questionário completo...');
+
+  // Limpa dados antigos para evitar duplicidade
+  await prisma.discAnswer.deleteMany({});
+  
   const questions = [
-    // Dominância (D)
-    { id: 1, text: "Eu sou focado em resultados e objetivos claros.", dimension: "D" },
-    { id: 2, text: "Eu tomo decisões rapidamente, mesmo sob pressão.", dimension: "D" },
-    { id: 3, text: "Eu gosto de assumir o comando e liderar projetos.", dimension: "D" },
-    // Influência (I)
-    { id: 4, text: "Eu gosto de interagir e conhecer novas pessoas.", dimension: "I" },
-    { id: 5, text: "Eu sou entusiasmado e otimista com novas ideias.", dimension: "I" },
-    { id: 6, text: "Eu tenho facilidade em convencer os outros.", dimension: "I" },
-    // Estabilidade (S)
-    { id: 7, text: "Eu prefiro trabalhar em um ambiente calmo e previsível.", dimension: "S" },
-    { id: 8, text: "Eu sou um bom ouvinte e apoio meus colegas.", dimension: "S" },
-    { id: 9, text: "Eu prefiro terminar uma tarefa antes de começar outra.", dimension: "S" },
-    // Conformidade (C)
-    { id: 10, text: "Eu presto muita atenção aos detalhes e à precisão.", dimension: "C" },
-    { id: 11, text: "Eu prefiro seguir regras e procedimentos claros.", dimension: "C" },
-    { id: 12, text: "Eu analiso todos os fatos antes de tomar uma decisão.", dimension: "C" },
+    // Dimensão: Expressão
+    { id: 1, dimension: 'Expressão', text: 'Eu me sinto à vontade comunicando minhas ideias em público.' },
+    { id: 2, dimension: 'Expressão', text: 'Tenho facilidade em persuadir outras pessoas.' },
+    
+    // Dimensão: Decisão
+    { id: 3, dimension: 'Decisão', text: 'Tomo decisões rapidamente, mesmo sob pressão.' },
+    { id: 4, dimension: 'Decisão', text: 'Prefiro assumir o controle de situações desafiadoras.' },
+    
+    // Dimensão: Regulação
+    { id: 5, dimension: 'Regulação', text: 'Sigo processos e normas rigorosamente.' },
+    { id: 6, dimension: 'Regulação', text: 'Analiso todos os riscos antes de agir.' },
+    
+    // Dimensão: Contexto
+    { id: 7, dimension: 'Contexto', text: 'Consigo me adaptar facilmente a novos ambientes.' },
+    { id: 8, dimension: 'Contexto', text: 'Levo em conta o impacto das minhas ações no grupo.' }
   ];
 
-  console.log('Limpando banco...');
-  await prisma.discAnswer.deleteMany();
-  
-  console.log('Semeando perguntas...');
-  // Nota: Como nosso modelo atual não tem uma tabela de 'Question', 
-  // vamos apenas garantir que o frontend saiba quais IDs usar.
-  // Em um sistema avançado, criaríamos a tabela Question.
-  
-  console.log('Pronto! 12 perguntas estruturadas.');
+  // Nota: Como o modelo DiscAnswer não tem campo 'text', 
+  // o seed servirá para garantir que o motor de análise saiba quais IDs pertencem a quais dimensões.
+  console.log('✅ Questionário mapeado no motor interno.');
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
-  .finally(async () => { await prisma.$disconnect(); });
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

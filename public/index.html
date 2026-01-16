@@ -3,172 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ânima - Análise de Dinâmica Comportamental</title>
+    <title>Análise de Dinâmica Psico-Comportamental</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
-        .btn-context.active, .btn-score.active { background-color: #F85E5E; color: white; border-color: #F85E5E; }
+        body { font-family: sans-serif; color: #1a202c; }
+        .scale-item { flex: 1; text-align: center; border: 1px solid #e2e8f0; margin: 0 2px; padding: 8px 0; border-radius: 4px; background: white; }
     </style>
 </head>
-<body class="p-6">
-    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mt-10">
-        <div class="text-center mb-8">
-            <img src="/logo-anima.png" alt="Ânima" class="w-48 mx-auto mb-4 object-contain">
-            <h2 class="text-xl font-extrabold text-gray-900 mb-1">Ânima</h2>
-            <p id="stepTitle" class="text-gray-500 text-sm">Inicie sua análise de dinâmica comportamental.</p>
-        </div>
+<body class="bg-gray-50 py-10 px-4">
+    <main class="max-w-2xl mx-auto bg-white shadow-md rounded-xl p-8">
+        
+        <!-- BLOCO 1 — CABEÇALHO PRINCIPAL -->
+        <header class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-900">Análise de Dinâmica Psico-Comportamental</h1>
+            <p class="text-sm text-gray-500">Uma leitura do seu funcionamento no momento atual.</p>
+        </header>
 
-        <!-- PASSO 1: CADASTRO -->
-        <form id="userForm" class="space-y-6">
-            <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Nome Completo</label>
-                <input type="text" id="name" required style="text-transform: uppercase;" placeholder="EX: FERNANDO LAZZAROTTO" class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
+        <!-- BLOCO 2 — MENSAGEM DE ABERTURA -->
+        <section class="mb-8 space-y-4 text-gray-700">
+            <p>Este não é um teste de personalidade.</p>
+            <p>Aqui buscamos compreender como você está funcionando agora, considerando comportamento, decisões, emoções e contexto.</p>
+            <p>Não existem respostas certas ou erradas — apenas percepções honestas.</p>
+        </section>
+
+        <!-- BLOCO 3 — COMO FUNCIONA -->
+        <section class="mb-8">
+            <p class="font-bold mb-3">Você vai:</p>
+            <ul class="space-y-2 mb-3">
+                <li class="flex items-start"><span class="mr-2">•</span> Responder a algumas afirmações simples</li>
+                <li class="flex items-start"><span class="mr-2">•</span> Escolher a opção que mais se aproxima do seu momento atual</li>
+                <li class="flex items-start"><span class="mr-2">•</span> Receber um mapa claro com insights práticos</li>
+            </ul>
+            <p class="text-xs text-gray-500">Duração média: 6 a 8 minutos</p>
+        </section>
+
+        <!-- BLOCO 4 — CONTEXTO DE RESPOSTA -->
+        <section class="mb-8">
+            <p class="font-bold">Em qual contexto você está respondendo?</p>
+            <p class="text-xs text-gray-500 mb-4">Essa informação ajuda a ajustar a forma de leitura do resultado. Ela não altera suas respostas.</p>
+            <div class="grid grid-cols-1 gap-3">
+                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="context" class="mr-3"> <span>Desenvolvimento profissional</span>
+                </label>
+                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="context" class="mr-3"> <span>Processo seletivo</span>
+                </label>
+                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="context" class="mr-3"> <span>Autoconhecimento</span>
+                </label>
+                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="context" class="mr-3"> <span>Relacionamento / casal</span>
+                </label>
             </div>
-            <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">E-mail</label>
-                <input type="email" id="email" required style="text-transform: lowercase;" placeholder="exemplo@email.com" class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
-            </div>
-            <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Contexto da Análise</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" data-value="Autoconhecimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Autoconhecimento</button>
-                    <button type="button" data-value="Desenvolvimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Desenvolvimento</button>
-                    <button type="button" data-value="Seletivo" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Processo Seletivo</button>
-                    <button type="button" data-value="Carreira" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Carreira</button>
-                </div>
-            </div>
-            <button type="submit" id="startBtn" class="w-full bg-black text-white rounded-2xl py-4 font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">COMEÇAR AVALIAÇÃO</button>
-        </form>
+        </section>
 
-        <!-- PASSO 2: PERGUNTAS -->
-        <div id="questionBox" class="hidden space-y-8">
-            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                <p id="questionText" class="text-gray-800 font-semibold text-center text-lg leading-tight"></p>
-            </div>
-            <div class="flex justify-between gap-2">
-                <button class="btn-score border-2 border-gray-100 rounded-xl w-full py-4 font-bold" data-score="1">1</button>
-                <button class="btn-score border-2 border-gray-100 rounded-xl w-full py-4 font-bold" data-score="2">2</button>
-                <button class="btn-score border-2 border-gray-100 rounded-xl w-full py-4 font-bold" data-score="3">3</button>
-                <button class="btn-score border-2 border-gray-100 rounded-xl w-full py-4 font-bold" data-score="4">4</button>
-                <button class="btn-score border-2 border-gray-100 rounded-xl w-full py-4 font-bold" data-score="5">5</button>
-            </div>
-            <p class="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">1: Discordo Totalmente | 5: Concordo Totalmente</p>
-        </div>
-
-        <!-- PASSO 3: FINALIZAÇÃO -->
-        <div id="finalBox" class="hidden text-center space-y-6">
-            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-            </div>
-            <h2 class="text-xl font-bold">Análise Concluída!</h2>
-            <p class="text-gray-500 text-sm">Seu Resumo Executivo está pronto para download.</p>
-            <button id="downloadBtn" class="w-full bg-[#F85E5E] text-white rounded-2xl py-4 font-bold shadow-lg shadow-red-100">BAIXAR RELATÓRIO ÂNIMA</button>
-        </div>
-    </div>
-
-    <script>
-        let currentQuestion = 0;
-        let answers = [];
-        const questions = [
-            { id: 1, text: "Sinto facilidade em expressar minhas ideias e influenciar pessoas.", dim: "Expressão" },
-            { id: 2, text: "Tomo decisões de forma rápida, mesmo sob pressão.", dim: "Decisão" },
-            { id: 3, text: "Prefiro seguir processos claros e regras estabelecidas.", dim: "Regulação" },
-            { id: 4, text: "Analiso profundamente o contexto antes de agir.", dim: "Contexto" }
-        ];
-
-        // Limpa qualquer ID antigo ao carregar a página
-        localStorage.removeItem('anima_user_id');
-
-        document.querySelectorAll('.btn-context').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.btn-context').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-
-        document.getElementById('userForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const context = document.querySelector('.btn-context.active')?.dataset.value;
-            if(!context) return alert('Selecione um contexto');
-
-            const btn = document.getElementById('startBtn');
-            btn.disabled = true;
-            btn.innerText = "PROCESSANDO...";
-
-            try {
-                const res = await fetch('/users', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        name: document.getElementById('name').value.toUpperCase(), 
-                        email: document.getElementById('email').value.toLowerCase(), 
-                        context 
-                    })
-                });
-                const user = await res.json();
-                
-                // TRAVA O ID NO NAVEGADOR
-                localStorage.setItem('anima_user_id', user.id);
-                
-                document.getElementById('userForm').classList.add('hidden');
-                document.getElementById('questionBox').classList.remove('hidden');
-                document.getElementById('stepTitle').innerText = "Responda com sinceridade.";
-                showQuestion();
-            } catch (err) {
-                alert('Erro de conexão. Tente novamente.');
-                btn.disabled = false;
-                btn.innerText = "COMEÇAR AVALIAÇÃO";
-            }
-        });
-
-        function showQuestion() {
-            document.getElementById('questionText').innerText = questions[currentQuestion].text;
-        }
-
-        document.querySelectorAll('.btn-score').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const score = parseInt(btn.dataset.score);
-                answers.push({ 
-                    questionId: questions[currentQuestion].id, 
-                    dimension: questions[currentQuestion].dim, 
-                    score 
-                });
-                
-                currentQuestion++;
-                if(currentQuestion < questions.length) {
-                    showQuestion();
-                } else {
-                    await finish();
-                }
-            });
-        });
-
-        async function finish() {
-            const userId = localStorage.getItem('anima_user_id');
-            document.getElementById('questionBox').innerHTML = '<p class="text-center font-bold">Salvando sua análise...</p>';
-
-            const response = await fetch('/disc/answers', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ userId, answers })
-            });
+        <!-- BLOCO 5 — ORIENTAÇÃO SOBRE A ESCALA -->
+        <section class="mb-8">
+            <p class="font-bold mb-1">📏 Como responder</p>
+            <p class="text-xs text-gray-500 mb-4">Use a escala abaixo considerando como você tem funcionado recentemente, não situações isoladas.</p>
             
-            if(response.ok) {
-                document.getElementById('questionBox').classList.add('hidden');
-                document.getElementById('finalBox').classList.remove('hidden');
-                document.getElementById('stepTitle').innerText = "Tudo pronto!";
-            } else {
-                alert('Erro ao salvar. Por favor, recarregue a página.');
-            }
-        }
+            <div class="flex justify-between text-[10px] font-bold uppercase text-gray-400 mb-2">
+                <span>Discordo totalmente</span>
+                <span>Concordo totalmente</span>
+            </div>
+            <div class="flex mb-6">
+                <div class="scale-item">[ 1 ]</div>
+                <div class="scale-item">[ 2 ]</div>
+                <div class="scale-item">[ 3 ]</div>
+                <div class="scale-item">[ 4 ]</div>
+                <div class="scale-item">[ 5 ]</div>
+            </div>
 
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            const userId = localStorage.getItem('anima_user_id');
-            if(userId) {
-                window.location.href = `/disc/${userId}/pdf`;
-            }
-        });
-    </script>
+            <div class="space-y-4 text-sm">
+                <div><strong>1 — Discordo totalmente</strong><br><small class="text-gray-500">Quase nunca acontece comigo.</small></div>
+                <div><strong>2 — Discordo parcialmente</strong><br><small class="text-gray-500">Acontece raramente.</small></div>
+                <div><strong>3 — Neutro / Depende</strong><br><small class="text-gray-500">Acontece às vezes, varia conforme o contexto.</small></div>
+                <div><strong>4 — Concordo parcialmente</strong><br><small class="text-gray-500">Acontece na maioria das vezes.</small></div>
+                <div><strong>5 — Concordo totalmente</strong><br><small class="text-gray-500">Acontece quase sempre.</small></div>
+            </div>
+        </section>
+
+        <!-- BLOCO 6 — SEGURANÇA E ÉTICA -->
+        <section class="mb-8 text-center text-[10px] text-gray-400 border-t pt-6">
+            • Suas respostas são confidenciais • Não realizamos diagnóstico clínico • O resultado reflete um momento, não define quem você é
+        </section>
+
+        <!-- BLOCO 7 — CTA PRINCIPAL -->
+        <section>
+            <button class="w-full bg-black text-white py-4 rounded-lg font-bold hover:bg-gray-800 transition-all">
+                ▶ Iniciar análise
+            </button>
+            <p class="text-center text-[10px] text-gray-500 mt-3">Responda com tranquilidade. Você pode pausar se necessário.</p>
+        </section>
+
+    </main>
 </body>
 </html>
