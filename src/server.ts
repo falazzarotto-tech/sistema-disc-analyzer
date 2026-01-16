@@ -12,52 +12,96 @@ fastify.register(fastifyStatic, {
   prefix: '/',
 });
 
+// ---------- ROTA /users ----------
+// Regra: se o email já existir, reutiliza o mesmo usuário (atualiza nome/contexto)
 fastify.post('/users', async (request, reply) => {
+  const { name, email, context } = request.body as any;
   try {
-    const user = await prisma.user.create({ data: request.body as any });
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: { name, email, context },
+      });
+      fastify.log.info(`Usuário criado: ${user.id}`);
+    } else {
+      user = await prisma.user.update({
+        where: { email },
+        data: { name, context },
+      });
+      fastify.log.info(`Usuário reutilizado: ${user.id}`);
+    }
+
     return user;
   } catch (e: any) {
-    return reply.status(500).send({ error: e.message });
+    fastify.log.error(e);
+    return reply.status(500).send({ error: 'Erro ao criar ou buscar usuário: ' + e.message });
   }
 });
 
+// ---------- ROTA /disc/answers ----------
 fastify.post('/disc/answers', async (request, reply) => {
   const { userId, answers } = request.body as any;
+
+  if (!userId || !answers || !Array.isArray(answers) || answers.length === 0) {
+    return reply.status(400).send({ error: 'Dados inválidos ou incompletos' });
+  }
+
   try {
-    // Limpeza e inserção
+    // 1) Confirma se o usuário existe
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return reply.status(400).send({ error: 'Usuário não encontrado para este ID' });
+    }
+
+    // 2) Limpa respostas antigas e salva novas
     await prisma.discAnswer.deleteMany({ where: { userId } });
+
     const result = await prisma.discAnswer.createMany({
       data: answers.map((a: any) => ({
         userId,
         questionId: Number(a.questionId),
         dimension: String(a.dimension),
-        score: Number(a.score)
-      }))
+        score: Number(a.score),
+      })),
     });
+
+    fastify.log.info(`Respostas salvas para usuário ${userId}: ${result.count}`);
     return { message: 'OK', count: result.count };
   } catch (e: any) {
-    console.error(e);
-    // RETORNA O ERRO REAL PARA O NAVEGADOR VER
-    return reply.status(500).send({ error: 'ERRO NO BANCO: ' + e.message });
+    fastify.log.error(e);
+    return reply.status(500).send({ error: 'Erro ao salvar respostas no banco: ' + e.message });
   }
 });
 
+// ---------- ROTA PDF ----------
 fastify.get('/disc/:userId/pdf', async (request, reply) => {
   const { userId } = request.params as any;
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  const scores = await prisma.discAnswer.findMany({ where: { userId } });
 
-  if (!user || scores.length === 0) return reply.status(404).send({ error: 'Dados não encontrados' });
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const scores = await prisma.discAnswer.findMany({ where: { userId } });
 
-  const dimensions = ['Expressão', 'Decisão', 'Regulação', 'Contexto'];
-  const formattedScores = dimensions.map(d => {
-    const dScores = scores.filter(s => s.dimension === d);
-    const avg = dScores.length > 0 ? dScores.reduce((acc, curr) => acc + curr.score, 0) / dScores.length : 0;
-    return { dimension: d, avg };
-  });
+    if (!user || scores.length === 0) {
+      return reply.status(404).send({ error: 'Dados não encontrados' });
+    }
 
-  const pdf = await generateDiscPdf(user, formattedScores);
-  reply.type('application/pdf').send(pdf);
+    const dimensions = ['Expressão', 'Decisão', 'Regulação', 'Contexto'];
+    const formattedScores = dimensions.map((d) => {
+      const dScores = scores.filter((s) => s.dimension === d);
+      const avg =
+        dScores.length > 0
+          ? dScores.reduce((acc, curr) => acc + curr.score, 0) / dScores.length
+          : 0;
+      return { dimension: d, avg };
+    });
+
+    const pdf = await generateDiscPdf(user, formattedScores);
+    reply.type('application/pdf').send(pdf);
+  } catch (e: any) {
+    fastify.log.error(e);
+    return reply.status(500).send({ error: 'Erro ao gerar PDF: ' + e.message });
+  }
 });
 
 const start = async () => {
