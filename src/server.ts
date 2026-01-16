@@ -19,34 +19,48 @@ fastify.post('/users', async (request, reply) => {
 
 fastify.post('/disc/answers', async (request, reply) => {
   const { userId, answers } = request.body as any;
-  console.log('DEBUG: Recebendo respostas para:', userId, answers);
-  
-  if (!userId || !answers || answers.length === 0) {
+  console.log(`[Ânima Log] Recebendo ${answers?.length} respostas para o usuário: ${userId}`);
+
+  if (!userId || !answers) {
     return reply.status(400).send({ error: 'Dados incompletos' });
   }
 
-  await prisma.discAnswer.deleteMany({ where: { userId } });
-  const result = await prisma.discAnswer.createMany({
-    data: answers.map((a: any) => ({
-      userId,
-      questionId: a.questionId,
-      dimension: a.dimension,
-      score: a.score
-    }))
-  });
-  return { message: 'OK', count: result.count };
+  try {
+    await prisma.discAnswer.deleteMany({ where: { userId } });
+    const result = await prisma.discAnswer.createMany({
+      data: answers.map((a: any) => ({
+        userId,
+        questionId: a.questionId,
+        dimension: a.dimension,
+        score: a.score
+      }))
+    });
+    console.log(`[Ânima Log] Sucesso: ${result.count} respostas salvas.`);
+    return { message: 'OK', count: result.count };
+  } catch (err) {
+    console.error('[Ânima Log] Erro ao salvar no banco:', err);
+    return reply.status(500).send({ error: 'Erro interno ao salvar' });
+  }
 });
 
 fastify.get('/disc/:userId/pdf', async (request, reply) => {
   const { userId } = request.params as any;
+  
   const user = await prisma.user.findUnique({ where: { id: userId } });
   const scores = await prisma.discAnswer.findMany({ where: { userId } });
 
   if (!user || scores.length === 0) {
+    console.error(`[Ânima Log] PDF Falhou: Usuário ${userId} encontrado? ${!!user}. Respostas: ${scores.length}`);
     return reply.status(404).send({ error: 'Dados não encontrados no banco' });
   }
 
-  const formattedScores = scores.map(s => ({ dimension: s.dimension, avg: s.score }));
+  const dimensions = ['Expressão', 'Decisão', 'Regulação', 'Contexto'];
+  const formattedScores = dimensions.map(d => {
+    const dScores = scores.filter(s => s.dimension === d);
+    const avg = dScores.length > 0 ? dScores.reduce((acc, curr) => acc + curr.score, 0) / dScores.length : 0;
+    return { dimension: d, avg };
+  });
+
   const pdf = await generateDiscPdf(user, formattedScores);
   reply.type('application/pdf').send(pdf);
 });
