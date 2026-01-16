@@ -7,10 +7,12 @@ import { generateDiscPdf } from './pdfService';
 const prisma = new PrismaClient();
 const fastify = Fastify({ logger: true });
 
-// Servir TODOS os arquivos da pasta public (incluindo logo_anima.png)
+// Caminho absoluto para evitar erro de localização em produção
+const publicPath = path.join(__dirname, '..', 'public');
+
 fastify.register(fastifyStatic, {
-  root: path.join(__dirname, '../public'),
-  prefix: '/',          // acessível em /index.html, /logo_anima.png, etc.
+  root: publicPath,
+  prefix: '/',
 });
 
 fastify.post('/users', async (request, reply) => {
@@ -27,10 +29,10 @@ fastify.post('/disc/answers', async (request, reply) => {
       userId,
       questionId: a.questionId,
       dimension: a.dimension,
-      score: a.score,
-    })),
+      score: a.score
+    }))
   });
-  return { message: 'Respostas registradas com sucesso' };
+  return { message: 'Respostas registradas' };
 });
 
 fastify.get('/disc/:userId/pdf', async (request, reply) => {
@@ -39,42 +41,24 @@ fastify.get('/disc/:userId/pdf', async (request, reply) => {
   const scores = await prisma.discAnswer.groupBy({
     by: ['dimension'],
     where: { userId },
-    _avg: { score: true },
+    _avg: { score: true }
   });
-
-  if (!user || scores.length === 0) {
-    return reply.status(404).send({ error: 'Mapa não encontrado' });
-  }
-
-  const formattedScores = scores.map((s) => ({
-    dimension: s.dimension,
-    avg: s._avg.score,
-  }));
-
+  if (!user || scores.length === 0) return reply.status(404).send({ error: 'Não encontrado' });
+  const formattedScores = scores.map(s => ({ dimension: s.dimension, avg: s._avg.score }));
   try {
     const pdf = await generateDiscPdf(user, formattedScores);
     const safeName = user.name.replace(/\s+/g, '_').toUpperCase();
-    const fileName = `Anima_Analise_${safeName}.pdf`;
-
-    reply
-      .type('application/pdf')
-      .header('Content-Disposition', `attachment; filename="${fileName}"`)
-      .send(pdf);
+    reply.type('application/pdf').header('Content-Disposition', `attachment; filename="Anima_${safeName}.pdf"`).send(pdf);
   } catch (err) {
-    reply.status(500).send({ error: 'Erro ao gerar Mapa' });
+    reply.status(500).send({ error: 'Erro PDF' });
   }
 });
 
 const start = async () => {
   try {
-    await fastify.listen({
-      port: Number(process.env.PORT) || 3000,
-      host: '0.0.0.0',
-    });
+    await fastify.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' });
   } catch (err) {
     process.exit(1);
   }
 };
-
 start();
-// Refresh deploy Sex 16 Jan 2026 04:22:48 -03
