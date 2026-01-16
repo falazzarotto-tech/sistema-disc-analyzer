@@ -14,28 +14,31 @@
 <body class="p-6">
     <div class="max-w-md mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mt-10">
         <div class="text-center mb-8">
-            <img src="logo-anima.png?v=1" alt="Ânima" class="w-48 mx-auto mb-6 object-contain">
-            <p id="stepTitle" class="text-gray-500 text-sm">Inicie sua análise comportamental.</p>
+            <img src="/logo-anima.png" alt="Ânima" class="w-48 mx-auto mb-4 object-contain">
+            <h2 class="text-xl font-extrabold text-gray-900 mb-1">Ânima</h2>
+            <p id="stepTitle" class="text-gray-500 text-sm">Inicie sua análise de dinâmica comportamental.</p>
         </div>
 
         <!-- PASSO 1: CADASTRO -->
         <form id="userForm" class="space-y-6">
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Nome Completo</label>
-                <input type="text" id="name" required style="text-transform: uppercase;" class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
+                <input type="text" id="name" required style="text-transform: uppercase;" placeholder="EX: FERNANDO LAZZAROTTO" class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
             </div>
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">E-mail</label>
-                <input type="email" id="email" required style="text-transform: lowercase;" class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
+                <input type="email" id="email" required style="text-transform: lowercase;" placeholder="exemplo@email.com" class="w-full border-b-2 border-gray-100 focus:border-[#F85E5E] outline-none py-2 text-sm">
             </div>
             <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Contexto</label>
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Contexto da Análise</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <button type="button" data-value="Autoconhecimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all">AUTOCONHECIMENTO</button>
-                    <button type="button" data-value="Desenvolvimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all">DESENVOLVIMENTO</button>
+                    <button type="button" data-value="Autoconhecimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Autoconhecimento</button>
+                    <button type="button" data-value="Desenvolvimento" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Desenvolvimento</button>
+                    <button type="button" data-value="Seletivo" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Processo Seletivo</button>
+                    <button type="button" data-value="Carreira" class="btn-context border-2 border-gray-100 rounded-xl py-3 text-[10px] font-bold transition-all uppercase">Carreira</button>
                 </div>
             </div>
-            <button type="submit" class="w-full bg-black text-white rounded-2xl py-4 font-bold hover:bg-gray-800 transition-all">COMEÇAR</button>
+            <button type="submit" class="w-full bg-black text-white rounded-2xl py-4 font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">COMEÇAR AVALIAÇÃO</button>
         </form>
 
         <!-- PASSO 2: PERGUNTAS -->
@@ -75,30 +78,36 @@
             { id: 4, text: "Analiso profundamente o contexto antes de agir.", dim: "Contexto" }
         ];
 
-        // Lógica de Cadastro
+        document.querySelectorAll('.btn-context').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.btn-context').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        nameInput.addEventListener('input', () => { nameInput.value = nameInput.value.toUpperCase(); });
+        emailInput.addEventListener('input', () => { emailInput.value = emailInput.value.toLowerCase(); });
+
         document.getElementById('userForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
             const context = document.querySelector('.btn-context.active')?.dataset.value;
             if(!context) return alert('Selecione um contexto');
 
             const res = await fetch('/users', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name, email, context })
+                body: JSON.stringify({ name: nameInput.value, email: emailInput.value, context })
             });
             const user = await res.json();
             userId = user.id;
-            showQuestions();
-        });
-
-        function showQuestions() {
+            
             document.getElementById('userForm').classList.add('hidden');
             document.getElementById('questionBox').classList.remove('hidden');
             document.getElementById('stepTitle').innerText = "Responda com sinceridade.";
             nextQuestion();
-        }
+        });
 
         function nextQuestion() {
             if(currentQuestion < questions.length) {
@@ -131,14 +140,6 @@
 
         document.getElementById('downloadBtn').addEventListener('click', () => {
             window.location.href = `/disc/${userId}/pdf`;
-        });
-
-        // Seleção de Contexto
-        document.querySelectorAll('.btn-context').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.btn-context').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
         });
     </script>
 </body>
