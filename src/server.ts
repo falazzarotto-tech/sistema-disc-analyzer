@@ -1,4 +1,3 @@
-import { generateProfessionalPDF } from "./pdfService";
 import fastify from 'fastify';
 import cors from '@fastify/cors';
 import staticFiles from '@fastify/static';
@@ -7,6 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import { QUESTION_MODULES } from './questionService';
 import { SYSTEM_IDENTITY } from './systemConfig';
 import { generateMapReport } from './aiService';
+import { generateProfessionalPDF } from './pdfService';
 
 const app = fastify({ logger: true });
 const prisma = new PrismaClient();
@@ -24,7 +24,7 @@ app.get('/questions', async () => {
 app.post('/users', async (request, reply) => {
   const { name, email, context } = request.body as any;
   return await prisma.user.upsert({
-    where: { email },
+    where: { email: email || '' },
     update: { name, context },
     create: { name, email, context },
   });
@@ -32,6 +32,8 @@ app.post('/users', async (request, reply) => {
 
 app.post('/disc/answers', async (request, reply) => {
   const { userId, answers } = request.body as any;
+  if (!userId) return reply.status(400).send({ error: 'userId é obrigatório' });
+  
   await prisma.discAnswer.deleteMany({ where: { userId } });
   await prisma.discAnswer.createMany({
     data: answers.map((a: any) => ({
@@ -44,7 +46,6 @@ app.post('/disc/answers', async (request, reply) => {
   return { status: 'success' };
 });
 
-// ROTA DO MAPA: Gera a análise completa seguindo as regras
 app.get('/disc/:userId/map', async (request, reply) => {
   const { userId } = request.params as { userId: string };
   
@@ -68,6 +69,27 @@ app.get('/disc/:userId/map', async (request, reply) => {
   return map;
 });
 
+app.get('/disc/:userId/pdf', async (request, reply) => {
+  const { userId } = request.params as { userId: string };
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const answers = await prisma.discAnswer.groupBy({
+    by: ['dimension'],
+    where: { userId },
+    _avg: { score: true }
+  });
+
+  if (!user || answers.length === 0) return reply.status(404).send({ error: 'Dados insuficientes' });
+
+  const scores = answers.map(a => ({ dimension: a.dimension, avg: a._avg.score || 3 }));
+  const map = generateMapReport(user.name, scores, user.context);
+  
+  const pdfBuffer = await generateProfessionalPDF(map);
+  
+  reply.header('Content-Type', 'application/pdf');
+  reply.header('Content-Disposition', `attachment; filename=Mapa_Anima_${user.name}.pdf`);
+  return reply.send(pdfBuffer);
+});
+
 const start = async () => {
   try {
     await app.listen({ port: Number(process.env.PORT) || 3000, host: '0.0.0.0' });
@@ -76,3 +98,24 @@ const start = async () => {
   }
 };
 start();
+
+app.get('/disc/:userId/pdf', async (request, reply) => {
+  const { userId } = request.params as { userId: string };
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const answers = await prisma.discAnswer.groupBy({
+    by: ['dimension'],
+    where: { userId },
+    _avg: { score: true }
+  });
+
+  if (!user || answers.length === 0) return reply.status(404).send({ error: 'Dados insuficientes' });
+
+  const scores = answers.map(a => ({ dimension: a.dimension, avg: a._avg.score || 3 }));
+  const map = generateMapReport(user.name, scores, user.context);
+  
+  const pdfBuffer = await generateProfessionalPDF(map);
+  
+  reply.header('Content-Type', 'application/pdf');
+  reply.header('Content-Disposition', `attachment; filename=Mapa_Anima_${user.name}.pdf`);
+  return reply.send(pdfBuffer);
+});
