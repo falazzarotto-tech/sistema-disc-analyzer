@@ -74,7 +74,6 @@ app.get('/disc/:userId/map', async (request, reply) => {
     avg: a._avg.score || 3
   }));
 
-  // Correção aplicada aqui:
   const map = generateMapReport(user.name, scores, user.context ?? '');
   return map;
 });
@@ -96,8 +95,6 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
   if (!user || answers.length === 0) return reply.status(404).send({ error: 'Dados insuficientes' });
 
   const scores = answers.map(a => ({ dimension: a.dimension, avg: a._avg.score || 3 }));
-
-  // Correção aplicada aqui também:
   const map = generateMapReport(user.name, scores, user.context ?? '');
   
   const pdfBuffer = await generateProfessionalPDF(map);
