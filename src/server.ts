@@ -13,27 +13,32 @@ fastify.register(fastifyStatic, {
 });
 
 fastify.post('/users', async (request, reply) => {
-  const user = await prisma.user.create({ data: request.body as any });
-  return user;
+  try {
+    const user = await prisma.user.create({ data: request.body as any });
+    return user;
+  } catch (e: any) {
+    return reply.status(500).send({ error: e.message });
+  }
 });
 
 fastify.post('/disc/answers', async (request, reply) => {
   const { userId, answers } = request.body as any;
-  
   try {
+    // Limpeza e inserção
     await prisma.discAnswer.deleteMany({ where: { userId } });
     const result = await prisma.discAnswer.createMany({
       data: answers.map((a: any) => ({
         userId,
         questionId: Number(a.questionId),
-        dimension: a.dimension,
+        dimension: String(a.dimension),
         score: Number(a.score)
       }))
     });
     return { message: 'OK', count: result.count };
-  } catch (err) {
-    fastify.log.error(err);
-    return reply.status(500).send({ error: 'Erro ao salvar no banco' });
+  } catch (e: any) {
+    console.error(e);
+    // RETORNA O ERRO REAL PARA O NAVEGADOR VER
+    return reply.status(500).send({ error: 'ERRO NO BANCO: ' + e.message });
   }
 });
 
@@ -42,9 +47,7 @@ fastify.get('/disc/:userId/pdf', async (request, reply) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   const scores = await prisma.discAnswer.findMany({ where: { userId } });
 
-  if (!user || scores.length === 0) {
-    return reply.status(404).send({ error: 'Dados não encontrados' });
-  }
+  if (!user || scores.length === 0) return reply.status(404).send({ error: 'Dados não encontrados' });
 
   const dimensions = ['Expressão', 'Decisão', 'Regulação', 'Contexto'];
   const formattedScores = dimensions.map(d => {
