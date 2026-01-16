@@ -1,3 +1,4 @@
+import { generateProfessionalPDF } from "./pdfService";
 import fastify from 'fastify';
 import cors from '@fastify/cors';
 import staticFiles from '@fastify/static';
