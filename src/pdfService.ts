@@ -1,111 +1,121 @@
 import puppeteer from 'puppeteer';
 
-export async function generateDiscPdf(userData: any, scores: any) {
-    const browser = await puppeteer.launch({
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage'
-        ]
-    });
-    const page = await browser.newPage();
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  context: string | null;
+};
 
-    const dominant = scores.find((s: any) => s.dimension === 'Expressão')?.avg || 0;
-    let fraseAncora = "No momento, você apresenta um funcionamento equilibrado e atento, com boa capacidade de análise e espaço para ajustes finos de ritmo e foco.";
-    if (dominant >= 4) {
-        fraseAncora = "No momento, você apresenta um funcionamento predominantemente ativo, estratégico e comunicativo, com boa integração emocional sob pressão e espaço para ajustes finos de foco e ritmo.";
-    } else if (dominant <= 2.5) {
-        fraseAncora = "No momento, você apresenta um funcionamento reflexivo, analítico e cauteloso, priorizando a segurança e a precisão nas suas entregas atuais.";
-    }
+type Score = {
+  dimension: string;
+  avg: number;
+};
 
-    const date = new Date().toLocaleDateString('pt-BR');
+export async function generateDiscPdf(user: User, scores: Score[]) {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--no-zygote',
+      '--single-process'
+    ]
+  });
 
-    const htmlContent = `
-    <!DOCTYPE html>
-    <html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-            body { font-family: 'Inter', sans-serif; color: #1A1A1A; margin: 0; padding: 40px; line-height: 1.5; }
-            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #EEE; padding-bottom: 20px; }
-            .logo { font-weight: 800; font-size: 20px; letter-spacing: -1px; }
-            .logo-dot { color: #F85E5E; }
-            .report-title { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #999; font-weight: 600; }
-            .section-meta { margin-bottom: 40px; }
-            .main-title { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
-            .subtitle { color: #666; font-size: 14px; }
-            .context-tag { font-size: 11px; color: #999; margin-top: 10px; font-weight: 600; }
-            .ancora-box { background: #F9FAFB; border-radius: 24px; padding: 32px; margin-bottom: 40px; border: 1px solid #F3F4F6; }
-            .ancora-text { font-size: 18px; font-weight: 600; color: #1A1A1A; line-height: 1.4; }
-            .card { margin-bottom: 30px; }
-            .card-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #F85E5E; margin-bottom: 15px; }
-            .indicator-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #F3F4F6; font-size: 14px; }
-            .indicator-name { font-weight: 500; }
-            .indicator-val { font-weight: 700; color: #F85E5E; }
-            .list-item { display: flex; gap: 10px; margin-bottom: 12px; font-size: 14px; color: #444; }
-            .list-bullet { color: #F85E5E; font-weight: bold; }
-            .footer-note { font-size: 11px; color: #999; margin-top: 40px; font-style: italic; }
-            .highlight-box { background: #FFF5F5; border-radius: 16px; padding: 20px; border: 1px solid #FED7D7; }
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <div class="logo">ânima<span class="logo-dot">.</span></div>
-            <div class="report-title">Relatório de Dinâmica</div>
-        </div>
-        <div class="section-meta">
-            <div class="main-title">Resumo Executivo</div>
-            <div class="subtitle">Estado Atual de Funcionamento</div>
-            <div class="context-tag">CONTEXTO: ${userData.context || 'Não informado'} | DATA: ${date} | CLIENTE: ${userData.name}</div>
-        </div>
-        <div class="ancora-box">
-            <div class="ancora-text">"${fraseAncora}"</div>
-        </div>
-        <div class="card">
-            <div class="card-title">Panorama Geral</div>
-            ${scores.map((s: any) => `
-                <div class="indicator-row">
-                    <span class="indicator-name">${s.dimension}</span>
-                    <span class="indicator-val">${getNivelTexto(s.avg)}</span>
-                </div>
-            `).join('')}
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
-            <div class="card">
-                <div class="card-title">O que se destaca agora</div>
-                <div class="list-item"><span class="list-bullet">•</span> Iniciativa e capacidade de agir diante de desafios</div>
-                <div class="list-item"><span class="list-bullet">•</span> Comunicação como principal ferramenta de influência</div>
-                <div class="list-item"><span class="list-bullet">•</span> Boa clareza emocional mesmo sob pressão</div>
-            </div>
-            <div class="card">
-                <div class="card-title">Zonas de atenção</div>
-                <div class="list-item"><span class="list-bullet">•</span> Possível sobrecarga por assumir muitas frentes</div>
-                <div class="list-item"><span class="list-bullet">•</span> Ritmo elevado mantido por longos períodos</div>
-                <div class="list-item"><span class="list-bullet">•</span> Necessidade consciente de priorização</div>
-            </div>
-        </div>
-        <div class="highlight-box">
-            <div class="card-title" style="margin-bottom: 10px;">Ajustes de Alta Alavancagem</div>
-            <div class="list-item"><strong>Foco seletivo:</strong> Escolher onde sua energia gera maior efeito.</div>
-            <div class="list-item"><strong>Ritmo sustentável:</strong> Alternar ação intensa com pausas intencionais.</div>
-            <div class="list-item"><strong>Delegação consciente:</strong> Preservar iniciativa sem centralizar execução.</div>
-        </div>
-        <div class="footer-note">
-            Este resumo oferece uma visão rápida do seu momento atual. As próximas páginas detalham cada dimensão.
-        </div>
-    </body>
-    </html>
-    `;
+  const page = await browser.newPage();
 
-    await page.setContent(htmlContent);
-    const pdf = await page.pdf({ format: 'A4', printBackground: true });
-    await browser.close();
-    return pdf;
-}
+  const today = new Date().toLocaleDateString('pt-BR');
 
-function getNivelTexto(score: number) {
-    if (score >= 4) return "Alta / Intensa";
-    if (score >= 3) return "Moderada / Integrada";
-    return "Suave / Reflexiva";
+  const html = `
+  <!DOCTYPE html>
+  <html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Relatório Ânima - ${user.name}</title>
+    <style>
+      body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+      .page { padding: 40px 60px; }
+      h1, h2, h3, h4 { margin: 0; }
+      .header { border-bottom: 4px solid #F85E5E; padding-bottom: 16px; margin-bottom: 24px; }
+      .logo { font-size: 24px; font-weight: 800; color: #111827; }
+      .tagline { font-size: 12px; color: #6B7280; margin-top: 4px; }
+      .meta { font-size: 11px; color: #6B7280; margin-top: 12px; }
+      .section-title { font-size: 14px; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: #111827; }
+      .section-text { font-size: 11px; color: #4B5563; line-height: 1.5; }
+      .score-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 11px; }
+      .score-table th, .score-table td { border: 1px solid #E5E7EB; padding: 6px 8px; text-align: left; }
+      .score-table th { background-color: #F9FAFB; font-weight: 600; }
+      .bar { height: 6px; border-radius: 999px; background-color: #F3F4F6; overflow: hidden; }
+      .bar-fill { height: 100%; background: linear-gradient(90deg, #F85E5E, #F97316); }
+      .footer { margin-top: 32px; font-size: 9px; color: #9CA3AF; text-align: right; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header">
+        <div class="logo">Ânima</div>
+        <div class="tagline">Análise de Dinâmica Comportamental</div>
+        <div class="meta">
+          Nome: <strong>${user.name}</strong><br />
+          E-mail: ${user.email}<br />
+          Contexto da análise: ${user.context || '—'}<br />
+          Data: ${today}
+        </div>
+      </div>
+
+      <h2 class="section-title">Resumo Executivo</h2>
+      <p class="section-text">
+        Este relatório apresenta uma leitura sintética das suas principais dinâmicas comportamentais
+        a partir das respostas fornecidas na avaliação Ânima.
+      </p>
+
+      <h3 class="section-title">Perfil de Pontuações</h3>
+      <table class="score-table">
+        <thead>
+          <tr>
+            <th>Dimensão</th>
+            <th>Média</th>
+            <th>Intensidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${scores.map(s => {
+            const pct = Math.min(100, (s.avg / 5) * 100);
+            return `
+              <tr>
+                <td>${s.dimension}</td>
+                <td>${s.avg.toFixed(2)}</td>
+                <td>
+                  <div class="bar">
+                    <div class="bar-fill" style="width: ${pct}%"></div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+
+      <h3 class="section-title">Observações Iniciais</h3>
+      <p class="section-text">
+        Este documento é um ponto de partida para conversas de desenvolvimento, tomada de decisão
+        de carreira e autoconhecimento. A interpretação deve sempre considerar o contexto real em
+        que você está inserido(a).
+      </p>
+
+      <div class="footer">
+        Relatório gerado automaticamente pelo Sistema Ânima.
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+
+  await page.setContent(html, { waitUntil: 'networkidle0' });
+  const pdf = await page.pdf({ format: 'A4', printBackground: true });
+  await browser.close();
+  return pdf;
 }
