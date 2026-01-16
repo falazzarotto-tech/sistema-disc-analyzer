@@ -1,121 +1,137 @@
 import puppeteer from 'puppeteer';
+import { SYSTEM_IDENTITY } from './systemConfig';
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  context: string | null;
-};
-
-type Score = {
-  dimension: string;
-  avg: number;
-};
-
-export async function generateDiscPdf(user: User, scores: Score[]) {
+export const generateProfessionalPDF = async (mapData: any) => {
   const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--no-zygote',
-      '--single-process'
-    ]
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
-
   const page = await browser.newPage();
 
-  const today = new Date().toLocaleDateString('pt-BR');
-
-  const html = `
-  <!DOCTYPE html>
-  <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Relatório Ânima - ${user.name}</title>
-    <style>
-      body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-      .page { padding: 40px 60px; }
-      h1, h2, h3, h4 { margin: 0; }
-      .header { border-bottom: 4px solid #F85E5E; padding-bottom: 16px; margin-bottom: 24px; }
-      .logo { font-size: 24px; font-weight: 800; color: #111827; }
-      .tagline { font-size: 12px; color: #6B7280; margin-top: 4px; }
-      .meta { font-size: 11px; color: #6B7280; margin-top: 12px; }
-      .section-title { font-size: 14px; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: #111827; }
-      .section-text { font-size: 11px; color: #4B5563; line-height: 1.5; }
-      .score-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 11px; }
-      .score-table th, .score-table td { border: 1px solid #E5E7EB; padding: 6px 8px; text-align: left; }
-      .score-table th { background-color: #F9FAFB; font-weight: 600; }
-      .bar { height: 6px; border-radius: 999px; background-color: #F3F4F6; overflow: hidden; }
-      .bar-fill { height: 100%; background: linear-gradient(90deg, #F85E5E, #F97316); }
-      .footer { margin-top: 32px; font-size: 9px; color: #9CA3AF; text-align: right; }
-    </style>
-  </head>
-  <body>
-    <div class="page">
-      <div class="header">
-        <div class="logo">Ânima</div>
-        <div class="tagline">Análise de Dinâmica Comportamental</div>
-        <div class="meta">
-          Nome: <strong>${user.name}</strong><br />
-          E-mail: ${user.email}<br />
-          Contexto da análise: ${user.context || '—'}<br />
-          Data: ${today}
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="pt-br">
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; color: #1d1d1f; line-height: 1.6; }
+        .page { height: 297mm; width: 210mm; padding: 25mm; box-sizing: border-box; page-break-after: always; position: relative; }
+        .red-text { color: #E30613; }
+        .gray-text { color: #86868b; }
+        h1 { font-size: 32pt; font-weight: 700; margin-bottom: 10px; }
+        h2 { font-size: 22pt; font-weight: 600; border-bottom: 1px solid #d2d2d7; padding-bottom: 10px; margin-top: 40px; }
+        h3 { font-size: 16pt; font-weight: 600; margin-top: 30px; }
+        p { font-size: 11pt; margin-bottom: 15px; }
+        .footer { position: absolute; bottom: 20mm; left: 25mm; right: 25mm; font-size: 9pt; color: #86868b; border-top: 0.5px solid #d2d2d7; pt: 10px; }
+        
+        /* Capa */
+        .capa { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .logo { height: 60px; margin-bottom: 40px; }
+        
+        /* Gráficos Simples (CSS) */
+        .chart-bar { background: #f5f5f7; height: 12px; border-radius: 6px; width: 100%; margin: 10px 0; overflow: hidden; }
+        .chart-fill { background: #E30613; height: 100%; }
+      </style>
+    </head>
+    <body>
+      <!-- PÁGINA 0: CAPA -->
+      <div class="page capa">
+        <img src="https://sistema-anima-analyzer-production.up.railway.app/logo-anima.png" class="logo">
+        <h1 class="red-text">Análise de Dinâmica Psico-Comportamental</h1>
+        <p class="gray-text" style="font-size: 18pt;">Uma leitura do funcionamento no momento atual</p>
+        <div style="margin-top: 100px;">
+          <p><strong>Respondente:</strong> ${mapData.userName}</p>
+          <p><strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
+          <p><strong>Contexto:</strong> ${mapData.context}</p>
         </div>
       </div>
 
-      <h2 class="section-title">Resumo Executivo</h2>
-      <p class="section-text">
-        Este relatório apresenta uma leitura sintética das suas principais dinâmicas comportamentais
-        a partir das respostas fornecidas na avaliação Ânima.
-      </p>
-
-      <h3 class="section-title">Perfil de Pontuações</h3>
-      <table class="score-table">
-        <thead>
-          <tr>
-            <th>Dimensão</th>
-            <th>Média</th>
-            <th>Intensidade</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${scores.map(s => {
-            const pct = Math.min(100, (s.avg / 5) * 100);
-            return `
-              <tr>
-                <td>${s.dimension}</td>
-                <td>${s.avg.toFixed(2)}</td>
-                <td>
-                  <div class="bar">
-                    <div class="bar-fill" style="width: ${pct}%"></div>
-                  </div>
-                </td>
-              </tr>
-            `;
-          }).join('')}
-        </tbody>
-      </table>
-
-      <h3 class="section-title">Observações Iniciais</h3>
-      <p class="section-text">
-        Este documento é um ponto de partida para conversas de desenvolvimento, tomada de decisão
-        de carreira e autoconhecimento. A interpretação deve sempre considerar o contexto real em
-        que você está inserido(a).
-      </p>
-
-      <div class="footer">
-        Relatório gerado automaticamente pelo Sistema Ânima.
+      <!-- PÁGINA 1: RESUMO EXECUTIVO -->
+      <div class="page">
+        <h2>Resumo Executivo (Estado Atual)</h2>
+        <p><em>Objetivo: Visão clara em 30–60 segundos.</em></p>
+        <div style="background: #f5f5f7; padding: 20px; border-radius: 12px; margin: 20px 0;">
+          <p><strong>Síntese:</strong> ${mapData.sections["Dinâmica Geral Observada"]}</p>
+        </div>
+        <h3>Principais Pontos de Destaque</h3>
+        <p>${mapData.sections["Como a Pessoa Tende a Atuar no Dia a Dia"]}</p>
+        <h3>Zonas de Atenção</h3>
+        <p>${mapData.sections["Pontos de Atenção no Momento"]}</p>
+        <h3>Ajustes de Alta Alavancagem</h3>
+        <ul>
+          ${mapData.sections["Ajustes Conscientes de Alta Alavancagem"].map((a: string) => `<li>${a}</li>`).join('')}
+        </ul>
+        <div class="footer">${SYSTEM_IDENTITY.disclaimer}</div>
       </div>
-    </div>
-  </body>
-  </html>
+
+      <!-- PÁGINA 2: MÓDULO 1 - PERCEPÇÃO -->
+      <div class="page">
+        <h2>Módulo 1: Percepção & Energia</h2>
+        <p class="gray-text">Como você percebe a realidade e direciona energia e atenção.</p>
+        <div class="chart-bar"><div class="chart-fill" style="width: 70%;"></div></div>
+        <p>${mapData.sections["Dinâmica Geral Observada"]}</p>
+        <div class="footer">Página 2 | Mapa de Dinâmica Anima</div>
+      </div>
+
+      <!-- PÁGINA 3: MÓDULO 2 - DECISÃO -->
+      <div class="page">
+        <h2>Módulo 2: Decisão & Julgamento</h2>
+        <p class="gray-text">Critérios de escolha, avaliação de impacto e prioridades.</p>
+        <div class="chart-bar"><div class="chart-fill" style="width: 55%;"></div></div>
+        <p>A dinâmica atual sugere uma tendência a equilibrar lógica e impacto relacional.</p>
+        <div class="footer">Página 3 | Mapa de Dinâmica Anima</div>
+      </div>
+
+      <!-- PÁGINA 4: MÓDULO 3 - COMPORTAMENTO -->
+      <div class="page">
+        <h2>Módulo 3: Dinâmica Comportamental</h2>
+        <p class="gray-text">Expressão comportamental observável (ação, influência, ritmo, estrutura).</p>
+        <p>${mapData.sections["Como a Pessoa Tende a Atuar no Dia a Dia"]}</p>
+        <div class="footer">Página 4 | Mapa de Dinâmica Anima</div>
+      </div>
+
+      <!-- PÁGINA 5: MÓDULO 4 - REGULAÇÃO -->
+      <div class="page">
+        <h2>Módulo 4: Regulação Emocional & Contexto</h2>
+        <p class="gray-text">Sustentação emocional, pressão atual, clareza e sustentabilidade.</p>
+        <p>${mapData.sections["Sustentação de Pressão no Momento"]}</p>
+        <div class="footer">Página 5 | Mapa de Dinâmica Anima</div>
+      </div>
+
+      <!-- PÁGINA 6: INTEGRAÇÃO -->
+      <div class="page">
+        <h2>Integração das Camadas</h2>
+        <p><em>Objetivo: Mostrar o todo, não as partes.</em></p>
+        <p>A integração das camadas sugere que seu funcionamento atual é impulsionado por uma busca de clareza contextual, onde a regulação emocional atua como o fiel da balança para a sustentação do ritmo.</p>
+        <div class="footer">Página 6 | Mapa de Dinâmica Anima</div>
+      </div>
+
+      <!-- PÁGINA 7: ORIENTAÇÕES PRÁTICAS -->
+      <div class="page">
+        <h2>Orientações Práticas</h2>
+        <p><em>Objetivo: Transformar consciência em ação possível.</em></p>
+        <h3>Ajustes Conscientes</h3>
+        <ul>
+          ${mapData.sections["Ajustes Conscientes de Alta Alavancagem"].map((a: string) => `<li>${a}</li>`).join('')}
+        </ul>
+        <div class="footer">Página 7 | Mapa de Dinâmica Anima</div>
+      </div>
+
+      <!-- PÁGINA 8: FECHAMENTO -->
+      <div class="page capa">
+        <h2>Fechamento do Relatório</h2>
+        <p style="max-width: 500px; margin: 40px auto;">Este mapa representa um momento e uma fotografia de sua dinâmica atual. Você tem a autonomia para revisitar e ajustar seu funcionamento conforme suas escolhas conscientes.</p>
+        <h3 class="red-text">Você não é este mapa.</h3>
+        <p>Este mapa existe para orientar escolhas mais conscientes.</p>
+        <div class="footer">Fim do Relatório | ${SYSTEM_IDENTITY.name}</div>
+      </div>
+
+    </body>
+    </html>
   `;
 
-  await page.setContent(html, { waitUntil: 'networkidle0' });
-  const pdf = await page.pdf({ format: 'A4', printBackground: true });
+  await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+  const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
   await browser.close();
-  return pdf;
-}
+  return pdfBuffer;
+};
