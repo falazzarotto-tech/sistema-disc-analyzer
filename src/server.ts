@@ -7,10 +7,11 @@ import { generateDiscPdf } from './pdfService';
 const prisma = new PrismaClient();
 const fastify = Fastify({ logger: true });
 
-// Configuração crucial para as imagens funcionarem
+// Configuração robusta para arquivos estáticos
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, '../public'),
   prefix: '/',
+  wildcard: false,
 });
 
 fastify.post('/users', async (request, reply) => {
