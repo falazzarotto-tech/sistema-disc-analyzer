@@ -31,14 +31,18 @@ app.post('/users', async (request, reply) => {
 });
 
 app.post('/disc/answers', async (request, reply) => {
-  const { userId, answers } = request.body as any;
+  const body = request.body as any;
+  const userId = body?.userId;
+  const answers = body?.answers ?? [];
+
   if (!userId) return reply.status(400).send({ error: 'userId é obrigatório' });
-  
-  // @ts-ignore
-  await prisma.discAnswer.deleteMany({ where: { userId: userId } });
+
+  const uid: string = String(userId);
+
+  await prisma.discAnswer.deleteMany({ where: { userId: uid } });
   await prisma.discAnswer.createMany({
     data: answers.map((a: any) => ({
-      userId: userId,
+      userId: uid,
       questionId: a.questionId,
       dimension: a.dimension,
       score: a.score
@@ -48,15 +52,16 @@ app.post('/disc/answers', async (request, reply) => {
 });
 
 app.get('/disc/:userId/map', async (request, reply) => {
-  const { userId } = request.params as { userId: string };
-  
-  // @ts-ignore
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  // @ts-ignore
+  const params = request.params as { userId?: string | null };
+  const userId = params.userId;
+  if (!userId) return reply.status(400).send({ error: 'userId é obrigatório' });
+
+  const uid: string = String(userId);
+
+  const user = await prisma.user.findUnique({ where: { id: uid } });
   const answers = await prisma.discAnswer.groupBy({
     by: ['dimension'],
-    // @ts-ignore
-    where: { userId: userId },
+    where: { userId: uid },
     _avg: { score: true }
   });
 
@@ -69,26 +74,31 @@ app.get('/disc/:userId/map', async (request, reply) => {
     avg: a._avg.score || 3
   }));
 
-  const map = generateMapReport(user.name, scores, user.context);
+  // Correção aplicada aqui:
+  const map = generateMapReport(user.name, scores, user.context ?? '');
   return map;
 });
 
 app.get('/disc/:userId/pdf', async (request, reply) => {
-  const { userId } = request.params as { userId: string };
-  // @ts-ignore
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  // @ts-ignore
+  const params = request.params as { userId?: string | null };
+  const userId = params.userId;
+  if (!userId) return reply.status(400).send({ error: 'userId é obrigatório' });
+
+  const uid: string = String(userId);
+
+  const user = await prisma.user.findUnique({ where: { id: uid } });
   const answers = await prisma.discAnswer.groupBy({
     by: ['dimension'],
-    // @ts-ignore
-    where: { userId: userId },
+    where: { userId: uid },
     _avg: { score: true }
   });
 
   if (!user || answers.length === 0) return reply.status(404).send({ error: 'Dados insuficientes' });
 
   const scores = answers.map(a => ({ dimension: a.dimension, avg: a._avg.score || 3 }));
-  const map = generateMapReport(user.name, scores, user.context);
+
+  // Correção aplicada aqui também:
+  const map = generateMapReport(user.name, scores, user.context ?? '');
   
   const pdfBuffer = await generateProfessionalPDF(map);
   
@@ -105,24 +115,3 @@ const start = async () => {
   }
 };
 start();
-
-app.get('/disc/:userId/pdf', async (request, reply) => {
-  const { userId } = request.params as { userId: string };
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  const answers = await prisma.discAnswer.groupBy({
-    by: ['dimension'],
-    where: { userId },
-    _avg: { score: true }
-  });
-
-  if (!user || answers.length === 0) return reply.status(404).send({ error: 'Dados insuficientes' });
-
-  const scores = answers.map(a => ({ dimension: a.dimension, avg: a._avg.score || 3 }));
-  const map = generateMapReport(user.name, scores, user.context);
-  
-  const pdfBuffer = await generateProfessionalPDF(map);
-  
-  reply.header('Content-Type', 'application/pdf');
-  reply.header('Content-Disposition', `attachment; filename=Mapa_Anima_${user.name}.pdf`);
-  return reply.send(pdfBuffer);
-});
