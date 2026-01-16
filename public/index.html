@@ -3,97 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análise de Dinâmica Psico-Comportamental</title>
+    <title>Análise de Dinâmica Psico-Comportamental | Anima</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        body { font-family: sans-serif; color: #1a202c; }
-        .scale-item { flex: 1; text-align: center; border: 1px solid #e2e8f0; margin: 0 2px; padding: 8px 0; border-radius: 4px; background: white; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #fcfcfc;
+            color: #1a1a1a;
+        }
+
+        .premium-card {
+            background: #ffffff;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .animate-delay-1 { animation-delay: 0.2s; }
+        .animate-delay-2 { animation-delay: 0.4s; }
+
+        /* Escala Dinâmica */
+        .scale-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .scale-dot {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .scale-dot:hover {
+            border-color: #000;
+            background: #000;
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .context-option {
+            transition: all 0.2s ease;
+            border: 1.5px solid #f3f4f6;
+        }
+        .context-option:hover {
+            border-color: #000;
+            background-color: #fafafa;
+        }
     </style>
 </head>
-<body class="bg-gray-50 py-10 px-4">
-    <main class="max-w-2xl mx-auto bg-white shadow-md rounded-xl p-8">
+<body class="py-12 px-4">
+    <main class="max-w-2xl mx-auto premium-card rounded-3xl p-10 md:p-16">
         
-        <!-- BLOCO 1 — CABEÇALHO PRINCIPAL -->
-        <header class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-900">Análise de Dinâmica Psico-Comportamental</h1>
-            <p class="text-sm text-gray-500">Uma leitura do seu funcionamento no momento atual.</p>
+        <!-- LOGO ANIMA -->
+        <div class="flex justify-center mb-12 animate__animated animate__fadeIn">
+            <img src="Cover Iogo.png" alt="Anima Logo" class="h-12 object-contain">
+        </div>
+
+        <!-- BLOCO 1 — CABEÇALHO (COM MOVIMENTO) -->
+        <header class="mb-10 animate__animated animate__fadeInUp">
+            <h1 class="text-3xl font-bold tracking-tight mb-2">Análise de Dinâmica Psico-Comportamental</h1>
+            <p class="text-gray-400 font-light">Uma leitura do seu funcionamento no momento atual.</p>
         </header>
 
-        <!-- BLOCO 2 — MENSAGEM DE ABERTURA -->
-        <section class="mb-8 space-y-4 text-gray-700">
+        <!-- BLOCO 2 — MENSAGEM DE ABERTURA (COM MOVIMENTO) -->
+        <section class="mb-12 space-y-4 text-lg leading-relaxed text-gray-600 animate__animated animate__fadeInUp animate-delay-1">
             <p>Este não é um teste de personalidade.</p>
             <p>Aqui buscamos compreender como você está funcionando agora, considerando comportamento, decisões, emoções e contexto.</p>
-            <p>Não existem respostas certas ou erradas — apenas percepções honestas.</p>
+            <p class="font-medium text-gray-900">Não existem respostas certas ou erradas — apenas percepções honestas.</p>
         </section>
 
         <!-- BLOCO 3 — COMO FUNCIONA -->
-        <section class="mb-8">
-            <p class="font-bold mb-3">Você vai:</p>
-            <ul class="space-y-2 mb-3">
-                <li class="flex items-start"><span class="mr-2">•</span> Responder a algumas afirmações simples</li>
-                <li class="flex items-start"><span class="mr-2">•</span> Escolher a opção que mais se aproxima do seu momento atual</li>
-                <li class="flex items-start"><span class="mr-2">•</span> Receber um mapa claro com insights práticos</li>
+        <section class="mb-12 animate__animated animate__fadeIn animate-delay-2">
+            <p class="font-bold text-sm uppercase tracking-widest text-gray-400 mb-6">O que esperar</p>
+            <ul class="space-y-4">
+                <li class="flex items-center space-x-4">
+                    <span class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-sm font-bold">1</span>
+                    <span class="text-gray-700">Responder a algumas afirmações simples</span>
+                </li>
+                <li class="flex items-center space-x-4">
+                    <span class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-sm font-bold">2</span>
+                    <span class="text-gray-700">Escolher a opção que mais se aproxima do seu momento atual</span>
+                </li>
+                <li class="flex items-center space-x-4">
+                    <span class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-sm font-bold">3</span>
+                    <span class="text-gray-700">Receber um mapa claro com insights práticos</span>
+                </li>
             </ul>
-            <p class="text-xs text-gray-500">Duração média: 6 a 8 minutos</p>
+            <p class="text-xs text-gray-400 mt-6 ml-12">Duração média: 6 a 8 minutos</p>
         </section>
 
-        <!-- BLOCO 4 — CONTEXTO DE RESPOSTA -->
-        <section class="mb-8">
-            <p class="font-bold">Em qual contexto você está respondendo?</p>
-            <p class="text-xs text-gray-500 mb-4">Essa informação ajuda a ajustar a forma de leitura do resultado. Ela não altera suas respostas.</p>
+        <!-- BLOCO 4 — CONTEXTO -->
+        <section class="mb-12">
+            <p class="font-bold mb-1">Em qual contexto você está respondendo?</p>
+            <p class="text-xs text-gray-400 mb-6">Essa informação ajuda a ajustar a forma de leitura do resultado.</p>
             <div class="grid grid-cols-1 gap-3">
-                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                    <input type="radio" name="context" class="mr-3"> <span>Desenvolvimento profissional</span>
+                <label class="context-option flex items-center p-4 rounded-2xl cursor-pointer">
+                    <input type="radio" name="context" class="w-4 h-4 accent-black mr-4"> 
+                    <span class="text-gray-700 font-medium">Desenvolvimento profissional</span>
                 </label>
-                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                    <input type="radio" name="context" class="mr-3"> <span>Processo seletivo</span>
+                <label class="context-option flex items-center p-4 rounded-2xl cursor-pointer">
+                    <input type="radio" name="context" class="w-4 h-4 accent-black mr-4"> 
+                    <span class="text-gray-700 font-medium">Processo seletivo</span>
                 </label>
-                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                    <input type="radio" name="context" class="mr-3"> <span>Autoconhecimento</span>
+                <label class="context-option flex items-center p-4 rounded-2xl cursor-pointer">
+                    <input type="radio" name="context" class="w-4 h-4 accent-black mr-4"> 
+                    <span class="text-gray-700 font-medium">Autoconhecimento</span>
                 </label>
-                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                    <input type="radio" name="context" class="mr-3"> <span>Relacionamento / casal</span>
+                <label class="context-option flex items-center p-4 rounded-2xl cursor-pointer">
+                    <input type="radio" name="context" class="w-4 h-4 accent-black mr-4"> 
+                    <span class="text-gray-700 font-medium">Relacionamento / casal</span>
                 </label>
             </div>
         </section>
 
-        <!-- BLOCO 5 — ORIENTAÇÃO SOBRE A ESCALA -->
-        <section class="mb-8">
+        <!-- BLOCO 5 — ESCALA DINÂMICA -->
+        <section class="mb-12 bg-gray-50 p-8 rounded-3xl">
             <p class="font-bold mb-1">📏 Como responder</p>
-            <p class="text-xs text-gray-500 mb-4">Use a escala abaixo considerando como você tem funcionado recentemente, não situações isoladas.</p>
+            <p class="text-xs text-gray-400 mb-8">Considere como você tem funcionado recentemente.</p>
             
-            <div class="flex justify-between text-[10px] font-bold uppercase text-gray-400 mb-2">
-                <span>Discordo totalmente</span>
-                <span>Concordo totalmente</span>
-            </div>
-            <div class="flex mb-6">
-                <div class="scale-item">[ 1 ]</div>
-                <div class="scale-item">[ 2 ]</div>
-                <div class="scale-item">[ 3 ]</div>
-                <div class="scale-item">[ 4 ]</div>
-                <div class="scale-item">[ 5 ]</div>
+            <div class="scale-container mb-10">
+                <div class="scale-dot">1</div>
+                <div class="scale-dot">2</div>
+                <div class="scale-dot">3</div>
+                <div class="scale-dot">4</div>
+                <div class="scale-dot">5</div>
             </div>
 
-            <div class="space-y-4 text-sm">
-                <div><strong>1 — Discordo totalmente</strong><br><small class="text-gray-500">Quase nunca acontece comigo.</small></div>
-                <div><strong>2 — Discordo parcialmente</strong><br><small class="text-gray-500">Acontece raramente.</small></div>
-                <div><strong>3 — Neutro / Depende</strong><br><small class="text-gray-500">Acontece às vezes, varia conforme o contexto.</small></div>
-                <div><strong>4 — Concordo parcialmente</strong><br><small class="text-gray-500">Acontece na maioria das vezes.</small></div>
-                <div><strong>5 — Concordo totalmente</strong><br><small class="text-gray-500">Acontece quase sempre.</small></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                <div class="opacity-60"><strong>1 — Discordo totalmente</strong><br>Quase nunca acontece comigo.</div>
+                <div class="opacity-60"><strong>2 — Discordo parcialmente</strong><br>Acontece raramente.</div>
+                <div class="opacity-100 font-medium"><strong>3 — Neutro / Depende</strong><br>Varia conforme o contexto.</div>
+                <div class="opacity-60"><strong>4 — Concordo parcialmente</strong><br>Na maioria das vezes.</div>
+                <div class="opacity-60"><strong>5 — Concordo totalmente</strong><br>Acontece quase sempre.</div>
             </div>
         </section>
 
-        <!-- BLOCO 6 — SEGURANÇA E ÉTICA -->
-        <section class="mb-8 text-center text-[10px] text-gray-400 border-t pt-6">
-            • Suas respostas são confidenciais • Não realizamos diagnóstico clínico • O resultado reflete um momento, não define quem você é
+        <!-- BLOCO 6 -->
+        <section class="mb-12 text-center text-[10px] text-gray-300 uppercase tracking-widest">
+            Confidencial • Sem diagnóstico clínico • Reflete um momento
         </section>
 
-        <!-- BLOCO 7 — CTA PRINCIPAL -->
+        <!-- BLOCO 7 -->
         <section>
-            <button class="w-full bg-black text-white py-4 rounded-lg font-bold hover:bg-gray-800 transition-all">
+            <button class="w-full bg-black text-white py-5 rounded-2xl font-bold text-lg hover:bg-gray-800 transform transition-all active:scale-95 shadow-xl shadow-black/10">
                 ▶ Iniciar análise
             </button>
-            <p class="text-center text-[10px] text-gray-500 mt-3">Responda com tranquilidade. Você pode pausar se necessário.</p>
+            <p class="text-center text-[10px] text-gray-400 mt-4">Responda com tranquilidade. Você pode pausar se necessário.</p>
         </section>
 
     </main>
