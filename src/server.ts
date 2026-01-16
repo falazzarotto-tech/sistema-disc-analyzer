@@ -7,7 +7,6 @@ import { generateDiscPdf } from './pdfService';
 const prisma = new PrismaClient();
 const fastify = Fastify({ logger: true });
 
-// Caminho absoluto para evitar erro de localização em produção
 const publicPath = path.join(__dirname, '..', 'public');
 
 fastify.register(fastifyStatic, {
