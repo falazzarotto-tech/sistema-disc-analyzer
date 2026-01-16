@@ -104,6 +104,9 @@ app.get('/disc/:userId/pdf', async (request, reply) => {
   return reply.send(pdfBuffer);
 });
 
+app.get("/debug/database-url", async (request, reply) => {
+  return { databaseUrl: process.env.DATABASE_URL || "não definido" };
+});
 const start = async () => {
   try {
     await app.listen({ port: Number(process.env.PORT) || 8080, host: '0.0.0.0' });
