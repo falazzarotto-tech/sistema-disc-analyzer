@@ -8,20 +8,21 @@ datasource db {
 }
 
 model User {
-  id        String       @id @default(uuid())
+  id        String        @id @default(uuid())
   name      String
-  email     String       @unique
+  email     String        @unique
   context   String?
   answers   DiscAnswer[]
-  createdAt DateTime     @default(now())
+  createdAt DateTime      @default(now())
 }
 
 model DiscAnswer {
   id         String   @id @default(uuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
   questionId Int
   dimension  String
   score      Int
   createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
